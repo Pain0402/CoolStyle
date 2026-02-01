@@ -404,3 +404,41 @@
 .shadow-theme-primary {
   box-shadow: 0 0 15px var(--color-primary) !important;
 }
+
+/* 🏃‍♂️ INFINITE SCROLL ANIMATION */
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+  /* Ensure hardware acceleration for smoothness */
+  will-change: transform;
+}
+
+/* Hover to pause */
+.hover-pause:hover .animate-scroll {
+  animation-play-state: paused !important;
+}
+
+.hover-pause:hover .animate-scroll>div {
+  transition: transform 0.5s ease;
+}
+
+.hover-pause:hover .animate-scroll>div:hover {
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+
+/* 🎭 FADE MASKS FOR SCROLL AREA (Disabling aggressive mask if requested, but keeping utility) */
+.mask-fade-sides {
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}

@@ -66,8 +66,15 @@ const fetchProducts = async (isBackground = false) => {
             return 0; // Keep original order otherwise
         });
 
-        // Get only first 8 products for Home (now showing main clothes first)
-        products.value = allItems.slice(0, 8); 
+        // Get only first 10 products for Home (limit requested by user)
+        products.value = allItems.slice(0, 10).map(p => {
+            // Add timestamp to force reload image if changed
+            if (p.thumbnailUrl) {
+                const separator = p.thumbnailUrl.includes('?') ? '&' : '?';
+                p.thumbnailUrl = `${p.thumbnailUrl}${separator}v=${Date.now()}`;
+            }
+            return p;
+        }); 
     } catch (err) {
         if (!isBackground) error.value = 'Không thể tải sản phẩm. Vui lòng kiểm tra kết nối.';
         console.error(err);
@@ -260,10 +267,8 @@ onUnmounted(() => {
 
     <!-- 2.5 Flash Sale / Best Sellers -->
     <section class="py-24 bg-theme-gradient relative overflow-hidden border-y border-white/5">
-        <!-- Background Effects -->
-        <div class="absolute -left-20 top-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px]"></div>
-        <div class="absolute right-0 bottom-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[80px]"></div>
-
+        <!-- Background Effects Removed -->
+        
         <div class="container mx-auto px-6 relative z-10">
             <div class="flex flex-col md:flex-row items-end justify-between mb-12 gap-8">
                 <!-- Header & Timer -->
@@ -288,15 +293,24 @@ onUnmounted(() => {
                 </button>
             </div>
 
-            <!-- Products Slider (Grid for now) -->
+            <!-- Infinite Horizontal Slider -->
              <div v-if="loading" class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div v-for="i in 4" :key="i" class="aspect-[3/4] bg-white/5 rounded-2xl animate-pulse"></div>
              </div>
              
-             <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                 <!-- Showing reversed slice for variety -->
-                 <ProductCard v-for="(product, index) in [...products].reverse().slice(0, 4)" :key="product.id" :product="product" 
-                              :data-aos="'fade-up'" :data-aos-delay="index * 100" />
+             <!-- Scrolling Container -->
+             <div v-else class="relative w-full overflow-hidden hover-pause group">
+                 <!-- Inner Track -->
+                 <div class="flex gap-6 w-max animate-scroll py-4">
+                     <!-- Original Set -->
+                     <div v-for="product in products" :key="'orig-' + product.id" class="w-[280px] flex-shrink-0">
+                        <ProductCard :product="product" />
+                     </div>
+                     <!-- Duplicate Set for Seamless Loop -->
+                     <div v-for="product in products" :key="'dup-' + product.id" class="w-[280px] flex-shrink-0">
+                        <ProductCard :product="product" />
+                     </div>
+                 </div>
              </div>
         </div>
     </section>
