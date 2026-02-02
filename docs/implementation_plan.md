@@ -1,83 +1,83 @@
-# Implementation Plan: FashionEcommerce Project
+# Implementation Plan: FashionEcommerce Project (MVP Complete)
 
-> **Status**: **Phase 4 Implementation Complete** (Admin Dashboard)
-> **Deployment**: VPS + Docker
-> **Payment**: Mock
-> **Admin**: Simple CRUD
+> **Status**: **MVP (Minimum Viable Product) Successfully Deployed** 🚀
+> **Tech Stack**: .NET 8, Vue 3, SQL Server, Docker, Cloudflare Tunnel.
 
 ## Phase 1: Foundation & Infrastructure (Completed)
 **Goal:** Setup the "Walking Skeleton" - a runnable app with zero features but full pipeline.
 
 - [x] **1.1. Project Scaffolding**
-  - [x] Initialize Git repository.
-  - [x] Setup Solution (`.sln`) with Clean Architecture layers.
-  - [x] Setup `docker-compose.yml` (SQL Server, Redis, Seq).
-  - [x] Verify Environment: Dotnet 8, Node 20+, Docker.
+  - [x] Initialize solution with Clean Architecture layers.
+  - [x] Setup `docker-compose.yml` (SQL, Redis, Seq).
 - [x] **1.2. Shared Kernel & Core**
-  - [x] Implement JSend Envelope Pattern (`ApiResponse<T>`).
-  - [x] Implement Global Exception Middleware.
-  - [x] Setup Serilog logging to Console & Seq.
+  - [x] JSend Envelope Pattern (`ApiResponse<T>`).
+  - [x] Global Exception Middleware & Serilog.
 - [x] **1.3. Infrastructure Setup**
-  - [x] EF Core configuration (SQL Server).
-  - [x] **Data Seeder**: `DataSeeder` service creates mock products/categories on startup.
+  - [x] EF Core (SQL Server) & Auto-Migration.
+  - [x] **Data Seeder**: Mock products/categories created on startup.
 - [x] **1.4. Frontend Foundation**
-  - [x] Vue 3 + Vite + TypeScript.
-  - [x] Tailwind CSS v4 setup.
-  - [x] Initial Layout (Coolstyle).
+  - [x] Vue 3 + Vite + Tailwind CSS v4.
 
 ## Phase 2: Core Domain - Identity & Catalog (Completed)
-**Goal:** Users can register and browse products.
+**Goal:** Users can browse products and log in.
 
-- [x] **2.1. Domain Modeling & Seeding**
+- [x] **2.1. Domain Modeling**
   - [x] Entities: `Product`, `Category`, `Variant`, `Stock`.
-  - [x] Database Migration (`InitialCreate`).
-  - [x] Auto-Seeding logic in `Program.cs`.
-
 - [x] **2.2. Product Public API**
-  - [x] Implement `GetProducts` Query (Pagination, Filtering).
-  - [x] Implement `GetProductDetail` Query.
-  - [x] **Frontend**: 
-    - [x] Integrate API Client (`axios` instance).
-    - [x] Product List Component (Grid + Filters).
-    - [x] Product Detail View (Basic).
-
+  - [x] `GetProducts` with filters/pagination.
+  - [x] Frontend: Product Grid & Card components.
 - [x] **2.3. Authentication Module**
   - [x] Register/Login API (Identity + JWT).
-  - [x] Frontend: Auth Store (Pinia) + Login Modal.
-  - [x] User Menu & Logout Logic.
+  - [x] Frontend: Auth Store (Pinia) & Login Modal.
 
-## Phase 3: Sales - Cart, Checkout & Orders (Completed)
-**Goal:** Mocked Revenue generation flow.
+## Phase 3: Sales - Cart & Checkout (Completed)
+**Goal:** Full revenue flow (Mocked).
 
 - [x] **3.1. Shopping Cart**
-  - [x] Store: Pinia Cart Store (LocalStorage persistence).
-  - [x] UI: Cart Drawer (Slide-over).
-  - [x] Logic: Add to Cart, Remove Item, Update Quantity.
-- [x] **3.2. Checkout Process (Mock)**
-  - [x] Address Form & Shipping Fee logic.
-  - [x] Payment Selection.
+  - [x] Pinia Cart Store with LocalStorage.
+  - [x] UI: Glassmorphism Cart Drawer.
+- [x] **3.2. Checkout Process**
+  - [x] Shipping Information Form.
+  - [x] Order creation logic.
 - [x] **3.3. Order Management**
-  - [x] Backend: Order Entities (`Order`, `OrderItem`).
+  - [x] Backend: `Order` & `OrderItem` entities.
   - [x] API: `CreateOrder` endpoint.
-  - [x] Frontend: Checkout Modal & API Integration.
 
 ## Phase 4: Admin & Operations (Completed)
 **Goal:** Simple Back-office.
 
 - [x] **4.1. Routing & Layout**
-  - [x] Install `vue-router`.
-  - [x] Split `App.vue` into `HomeView` and `AdminView`.
+  - [x] Vue Router implementation.
+  - [x] Split Layouts: Shop vs Admin Dashboard.
 - [x] **4.2. Admin Dashboard**
-  - [x] Secure `/admin` route (Basic URL routing).
-  - [x] Admin Order List (Table View).
-  - [x] Update Order Status API.
+  - [x] Secure Order List Table.
+  - [x] Update Order Status (Pending -> Delivered).
 
-## Phase 5: Production Prep (In Progress)
-**Goal:** Deploy to VPS.
+## Phase 5: Production & Deployment (Completed)
+**Goal:** Ready for the world.
 
-- [ ] **5.1. Docker Production**
-  - [ ] Backend Dockerfile (Multi-stage build).
-  - [ ] Frontend Dockerfile (Nginx).
-  - [ ] `docker-compose.prod.yml`.
-- [ ] **5.2. Deploy**
-  - [ ] Script to build and run in production mode.
+- [x] **5.1. Dockerization**
+  - [x] Multi-stage build for .NET 8.
+  - [x] Nginx container for Vue SPA.
+- [x] **5.2. Orchestration**
+  - [x] `docker-compose.prod.yml` for full stack.
+- [x] **5.3. Remote Access**
+  - [x] Cloudflare Tunnel integration for HTTPS.
+- [x] **5.4. Automation**
+  - [x] `deploy.ps1` (First install) & `update.ps1` (Zero-data-loss update).
+
+---
+
+## 🛠️ Next Steps (Post-MVP Roadmap)
+
+### Phase 6: Professionalization
+- [ ] **RBAC (Role Based Access Control)**: Secure Admin endpoints with real role checks.
+- [ ] **Real Payment Integration**: VNPay / Momo / Stripe integration.
+- [ ] **Image Management**: Use Cloudinary or S3 for real image uploads instead of placeholders.
+- [ ] **Product CRUD**: Build UI for Admin to Add/Edit/Delete products and manage stock.
+
+### Phase 7: Optimization
+- [ ] **Unit Testing**: 80% coverage for Domain/Application layers.
+- [ ] **Performance**: Redis Caching for Product Catalog.
+- [ ] **SEO**: Better Meta tags and Server-Side Rendering (if needed).
+- [ ] **Monitoring**: Set up UptimeRobot to monitor Tunnel status.
