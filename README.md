@@ -13,7 +13,7 @@
 ## 📸 Giao diện ứng dụng
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Pain0402/CoolStyle/main/docs/images/home_preview.png" alt="CoolStyle Home" width="800">
+  <img src="./docs/images/homepage.png" alt="CoolStyle Home" width="800">
   <p><i>Giao diện trang chủ với phong cách tối giản và hiện đại</i></p>
 </div>
 
