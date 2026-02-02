@@ -1,0 +1,79 @@
+version: "3.8"
+
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: fashion_sql_prod
+    environment:
+      SA_PASSWORD: "Password123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data_prod:/var/opt/mssql
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: fashion_redis_prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_prod:/data
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Backend/Dockerfile
+    container_name: fashion_api_prod
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sql;Database=FashionEcommerceDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - Serilog__WriteTo__0__Args__serverUrl=http://seq:5341
+      - JwtSettings__Secret=ThisIsASecretKeyForJwtValidationWaitItMustBeLonger32Chars
+      - JwtSettings__Issuer=FashionEcommerceAPI
+      - JwtSettings__Audience=FashionEcommerceClient
+      - AllowedOrigins__0=http://localhost:5173
+      - AllowedOrigins__1=http://localhost:5174
+      - AllowedOrigins__2=http://localhost
+      - AllowedOrigins__3=https://${CLOUDFLARE_DOMAIN}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sql
+      - redis
+    restart: always
+
+  frontend:
+    build:
+      context: ./src/Frontend
+      dockerfile: Dockerfile
+    container_name: fashion_frontend_prod
+    ports:
+      - "80:80"
+    restart: always
+
+  seq:
+    image: datalust/seq:latest
+    container_name: fashion_seq_prod
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: "Y"
+    volumes:
+      - seq_data_prod:/data
+    restart: always
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: fashion_tunnel
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+
+volumes:
+  sql_data_prod:
+  redis_data_prod:
+  seq_data_prod:

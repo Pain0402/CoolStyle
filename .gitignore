@@ -1,0 +1,41 @@
+# .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+dist-ssr/
+*.local
+
+# Environment variables (Sensitive)
+.env
+.env.*
+!.env.example
+!.env.production
+
+# Docker & Persistence
+sql_data/
+redis_data/
+seq_data/
+sql_data_prod/
+redis_data_prod/
+seq_data_prod/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

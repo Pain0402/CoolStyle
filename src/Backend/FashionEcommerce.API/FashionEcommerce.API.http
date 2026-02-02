@@ -1,0 +1,6 @@
+@FashionEcommerce.API_HostAddress = http://localhost:5058
+
+GET {{FashionEcommerce.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
