@@ -3,9 +3,13 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <RouterView />
+  <RouterView v-slot="{ Component }">
+    <transition name="page" mode="out-in">
+      <component :is="Component" />
+    </transition>
+  </RouterView>
 </template>
 
 <style>
-@import './style.css';
+/* Global CSS is imported in main.ts */
 </style>

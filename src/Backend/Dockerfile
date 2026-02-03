@@ -12,6 +12,7 @@ COPY *.sln .
 RUN dotnet restore src/Backend/FashionEcommerce.API/FashionEcommerce.API.csproj
 
 # Copy everything else and build
+ARG CACHEBUST=1
 COPY src/Backend/ ./src/Backend/
 WORKDIR /app/src/Backend/FashionEcommerce.API
 RUN dotnet publish -c Release -o /app/out
