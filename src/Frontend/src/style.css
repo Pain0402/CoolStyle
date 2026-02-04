@@ -21,14 +21,25 @@
 }
 
 /* 🎨 THEME DEFINITIONS */
+/* 🎨 THEME DEFINITIONS */
 :root {
   /* Default: Cyberpunk Luxury */
   --color-dark-bg: #050505;
   --color-dark-surface: #0f1012;
   --color-dark-card: #18191c;
-  --color-neon-cyan: #00f2ea;
-  --color-neon-purple: #ff0055;
-  --color-neon-blue: #4361ee;
+
+  --color-primary: #00f2ea;
+  /* Was neon-cyan */
+  --color-secondary: #ff0055;
+  /* Was neon-purple */
+  --color-accent: #4361ee;
+  /* Was neon-blue */
+
+  /* Legacy mapping for backward compatibility if needed */
+  --color-neon-cyan: var(--color-primary);
+  --color-neon-purple: var(--color-secondary);
+  --color-neon-blue: var(--color-accent);
+
   --bg-section-gradient: linear-gradient(to right, #1a0033, #000000);
 }
 
@@ -37,9 +48,14 @@
   --color-dark-bg: #0A0A0A;
   --color-dark-surface: #141414;
   --color-dark-card: #1F1F1F;
-  --color-neon-cyan: #FFD700;
-  --color-neon-purple: #C0C0C0;
-  --color-neon-blue: #DAA520;
+
+  --color-primary: #FFD700;
+  /* Gold */
+  --color-secondary: #C0C0C0;
+  /* Silver */
+  --color-accent: #DAA520;
+  /* Dark Gold */
+
   --bg-section-gradient: linear-gradient(to right, #332b00, #000000);
 }
 
@@ -48,20 +64,31 @@
   --color-dark-bg: #121212;
   --color-dark-surface: #1E1E1E;
   --color-dark-card: #252525;
-  --color-neon-cyan: #CCFF00;
-  --color-neon-purple: #7B2CBF;
-  --color-neon-blue: #3A0CA3;
+
+  --color-primary: #CCFF00;
+  /* Lime */
+  --color-secondary: #7B2CBF;
+  /* Deep Purple */
+  --color-accent: #3A0CA3;
+  /* Blue */
+
   --bg-section-gradient: linear-gradient(to right, #1a3300, #000000);
 }
 
 /* 3. Sunset Vapor (Retrowave) */
 [data-theme="sunset"] {
   --color-dark-bg: #1A0B2E;
+  /* Deep Purple */
   --color-dark-surface: #2D1B4E;
   --color-dark-card: #432C7A;
-  --color-neon-cyan: #FF5F1F;
-  --color-neon-purple: #FF007F;
-  --color-neon-blue: #F72585;
+
+  --color-primary: #FF5F1F;
+  /* Neon Orange */
+  --color-secondary: #FF007F;
+  /* Magenta */
+  --color-accent: #F72585;
+  /* Pink */
+
   --bg-section-gradient: linear-gradient(to right, #33001a, #000000);
 }
 
@@ -70,9 +97,14 @@
   --color-dark-bg: #000000;
   --color-dark-surface: #0F0F0F;
   --color-dark-card: #1A1A1A;
-  --color-neon-cyan: #FFFFFF;
-  --color-neon-purple: #888888;
-  --color-neon-blue: #444444;
+
+  --color-primary: #FFFFFF;
+  /* White Glow */
+  --color-secondary: #888888;
+  /* Silver */
+  --color-accent: #444444;
+  /* Grey */
+
   --bg-section-gradient: linear-gradient(to right, #1a1a1a, #000000);
 }
 
@@ -300,8 +332,75 @@
   opacity: 0.5 !important;
 }
 
-.Vue-Toastification__icon {
-  margin-right: 12px !important;
-  width: 20px !important;
-  height: 20px !important;
+
+/* 🎨 DYNAMIC THEME UTILITIES */
+/* Use these instead of static Tailwind classes like text-cyan-500 */
+
+/* Text Colors */
+.text-theme-primary {
+  color: var(--color-primary) !important;
+}
+
+.text-theme-secondary {
+  color: var(--color-secondary) !important;
+}
+
+.text-theme-accent {
+  color: var(--color-accent) !important;
+}
+
+/* Backgrounds */
+.bg-theme-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.bg-theme-secondary {
+  background-color: var(--color-secondary) !important;
+}
+
+.bg-theme-accent {
+  background-color: var(--color-accent) !important;
+}
+
+/* Borders */
+.border-theme-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.border-theme-secondary {
+  border-color: var(--color-secondary) !important;
+}
+
+.border-theme-accent {
+  border-color: var(--color-accent) !important;
+}
+
+/* Hover States (Simple implementation) */
+.hover\:text-theme-primary:hover {
+  color: var(--color-primary) !important;
+}
+
+.hover\:bg-theme-primary:hover {
+  background-color: var(--color-primary) !important;
+}
+
+.hover\:border-theme-primary:hover {
+  border-color: var(--color-primary) !important;
+}
+
+.group:hover .group-hover\:text-theme-primary {
+  color: var(--color-primary) !important;
+}
+
+.group:hover .group-hover\:bg-theme-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.group:hover .group-hover\:border-theme-primary {
+  border-color: var(--color-primary) !important;
+}
+
+/* Shadows */
+.shadow-theme-primary {
+  box-shadow: 0 0 15px var(--color-primary) !important;
 }

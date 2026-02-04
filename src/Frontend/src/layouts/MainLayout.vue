@@ -106,18 +106,18 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col font-sans text-white selection:bg-cyan-500/30 selection:text-cyan-100">
+  <div class="min-h-screen flex flex-col font-sans text-white selection:bg-theme-primary selection:text-black">
     <!-- Navbar (Neo-Glass) -->
     <header class="h-20 fixed w-full top-0 z-50 transition-all duration-300 glass">
       <div class="h-full container mx-auto px-6 flex items-center justify-between">
           
           <!-- Mobile Menu -->
-          <button class="md:hidden p-2 text-white hover:text-cyan-400 transition">
+          <button class="md:hidden p-2 text-white hover:text-theme-primary transition">
             <Menu :size="24" />
           </button>
 
           <!-- Logo -->
-          <router-link to="/" class="text-2xl font-display font-black tracking-[0.1em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 hover:to-cyan-400 transition-colors">
+          <router-link to="/" class="text-2xl font-display font-black tracking-[0.1em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 hover:to-theme-primary transition-colors">
             CoolStyle
           </router-link>
           
@@ -136,8 +136,8 @@ const handleLogout = () => {
                 <router-link to="/shop?gender=women" class="nav-link">Women</router-link>
             </template>
 
-            <router-link to="/shop" class="nav-link text-neon">Collections</router-link>
-            <router-link to="/shop" class="text-red-500 hover:text-red-400 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] transition">Sale</router-link>
+            <router-link to="/shop" class="nav-link text-theme-primary">Collections</router-link>
+            <router-link to="/shop" class="text-theme-secondary hover:text-theme-secondary hover:drop-shadow-[0_0_8px_rgba(255,0,85,0.5)] transition">Sale</router-link>
           </nav>
           
           <!-- Icons -->
@@ -146,9 +146,9 @@ const handleLogout = () => {
             <!-- Inline Expanding Search Bar -->
             <div class="relative flex items-center">
                 <div :class="['flex items-center bg-white/5 border border-white/10 rounded-full transition-all duration-500 ease-in-out px-3 overflow-hidden', 
-                              showSearch ? 'w-[250px] h-10 border-cyan-500/50 bg-white/10 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'w-10 h-10 border-transparent cursor-pointer hover:bg-white/10']"
+                              showSearch ? 'w-[250px] h-10 border-theme-primary bg-white/10 shadow-theme-primary' : 'w-10 h-10 border-transparent cursor-pointer hover:bg-white/10']"
                      @click="!showSearch && toggleSearch()">
-                    <Search :size="18" :class="['transition-colors duration-300 flex-shrink-0', showSearch ? 'text-cyan-400' : 'text-gray-400']" />
+                    <Search :size="18" :class="['transition-colors duration-300 flex-shrink-0', showSearch ? 'text-theme-primary' : 'text-gray-400']" />
                     <input 
                         v-if="showSearch"
                         v-model="searchQuery"
@@ -160,7 +160,7 @@ const handleLogout = () => {
                         @blur="!searchQuery && (showSearch = false)"
                         @keyup.esc="showSearch = false"
                     >
-                    <Loader2 v-if="isSearching && showSearch" class="ml-2 text-cyan-400 animate-spin flex-shrink-0" :size="14" />
+                    <Loader2 v-if="isSearching && showSearch" class="ml-2 text-theme-primary animate-spin flex-shrink-0" :size="14" />
                     <button v-if="showSearch && searchQuery" @click.stop="searchQuery = ''" class="ml-2 text-gray-500 hover:text-white flex-shrink-0">
                         <X :size="14" />
                     </button>
@@ -175,8 +175,8 @@ const handleLogout = () => {
                              class="px-4 py-3 hover:bg-white/5 flex items-center gap-4 cursor-pointer group transition">
                             <img :src="product.thumbnailUrl" class="w-10 h-12 object-cover rounded-md border border-white/10" />
                             <div class="flex-1 min-w-0">
-                                <h5 class="text-sm font-bold truncate group-hover:text-cyan-400 transition">{{ product.name }}</h5>
-                                <p class="text-[10px] text-cyan-500/70 uppercase tracking-widest">{{ product.categoryName }}</p>
+                                <h5 class="text-sm font-bold truncate group-hover:text-theme-primary transition">{{ product.name }}</h5>
+                                <p class="text-[10px] text-theme-primary opacity-70 uppercase tracking-widest">{{ product.categoryName }}</p>
                             </div>
                             <div class="text-xs font-black">{{ formatCurrency(product.basePrice) }}</div>
                         </div>
@@ -195,9 +195,9 @@ const handleLogout = () => {
             <!-- User Logic -->
             <div class="relative">
               <button v-if="authStore.isAuthenticated" @click="showUserMenu = !showUserMenu" class="icon-btn flex items-center gap-3 p-1.5 pr-4 group">
-                 <div class="w-9 h-9 rounded-full overflow-hidden border border-white/10 group-hover:border-cyan-500 transition-all shadow-[0_0_10px_rgba(255,255,255,0.05)]">
+                 <div class="w-9 h-9 rounded-full overflow-hidden border border-white/10 group-hover:border-theme-primary transition-all shadow-[0_0_10px_rgba(255,255,255,0.05)]">
                     <img v-if="authStore.user?.avatarUrl" :src="authStore.user.avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
-                    <div v-else class="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xs font-bold text-black">
+                    <div v-else class="w-full h-full bg-theme-primary flex items-center justify-center text-xs font-bold text-black">
                         {{ authStore.user?.fullName?.charAt(0) }}
                     </div>
                  </div>
@@ -224,7 +224,7 @@ const handleLogout = () => {
 
             <button @click="showCartDrawer = true" class="icon-btn relative group">
                 <ShoppingBag :size="20" stroke-width="2.5" />
-                <span v-if="cartStore.totalItems > 0" class="absolute -top-1 -right-1 bg-[#00f2ea] text-black text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow-[0_0_10px_rgba(0,242,234,0.6)] animate-pulse">
+                <span v-if="cartStore.totalItems > 0" class="absolute -top-1 -right-1 bg-theme-primary text-black text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow-theme-primary animate-pulse">
                     {{ cartStore.totalItems }}
                 </span>
             </button>
@@ -254,13 +254,13 @@ const handleLogout = () => {
                Chất lượng vượt trội, thiết kế đột phá.
            </p>
            <div class="flex gap-4">
-               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#00f2ea] hover:text-black hover:border-transparent transition-all duration-300">
+               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-theme-primary hover:text-black hover:border-transparent transition-all duration-300">
                    <Instagram :size="18" />
                </a>
-               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-600 hover:text-white hover:border-transparent transition-all duration-300">
+               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-theme-accent hover:text-white hover:border-transparent transition-all duration-300">
                    <Facebook :size="18" />
                </a>
-               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-sky-400 hover:text-white hover:border-transparent transition-all duration-300">
+               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-theme-primary hover:text-white hover:border-transparent transition-all duration-300">
                    <Twitter :size="18" />
                </a>
            </div>
@@ -270,19 +270,19 @@ const handleLogout = () => {
         <div>
            <h4 class="font-bold mb-6 uppercase tracking-widest text-sm">Shop</h4>
            <ul class="space-y-3 text-sm text-gray-400">
-             <li><a href="#" class="hover:text-cyan-400 transition">All Products</a></li>
-             <li><a href="#" class="hover:text-cyan-400 transition">New Arrivals</a></li>
-             <li><a href="#" class="hover:text-cyan-400 transition">Accessories</a></li>
-             <li><a href="#" class="hover:text-cyan-400 transition">Sales</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">All Products</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">New Arrivals</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">Accessories</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">Sales</a></li>
            </ul>
         </div>
          <div>
            <h4 class="font-bold mb-6 uppercase tracking-widest text-sm">Support</h4>
            <ul class="space-y-3 text-sm text-gray-400">
-             <li><a href="#" class="hover:text-cyan-400 transition">FAQ</a></li>
-             <li><a href="#" class="hover:text-cyan-400 transition">Return Policy</a></li>
-             <li><a href="#" class="hover:text-cyan-400 transition">Terms of Service</a></li>
-             <li><a href="#" class="hover:text-cyan-400 transition">Privacy</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">FAQ</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">Return Policy</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">Terms of Service</a></li>
+             <li><a href="#" class="hover:text-theme-primary transition">Privacy</a></li>
            </ul>
         </div>
         
@@ -290,8 +290,8 @@ const handleLogout = () => {
         <div>
             <h4 class="font-bold mb-6 uppercase tracking-widest text-sm">Stay in the loop</h4>
             <div class="flex">
-                <input type="email" placeholder="Enter your email" class="bg-white/5 border border-white/10 rounded-l-lg px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan-500/50 transition placeholder-gray-600">
-                <button class="bg-white text-black font-bold px-4 rounded-r-lg hover:bg-cyan-400 transition">
+                <input type="email" placeholder="Enter your email" class="bg-white/5 border border-white/10 rounded-l-lg px-4 py-3 text-sm w-full focus:outline-none focus:border-theme-primary transition placeholder-gray-600">
+                <button class="bg-white text-black font-bold px-4 rounded-r-lg hover:bg-theme-primary transition">
                     <ArrowRight :size="18" />
                 </button>
             </div>
@@ -322,7 +322,7 @@ const handleLogout = () => {
     left: 0;
     width: 0;
     height: 2px;
-    background-color: #22d3ee; /* cyan-400 */
+    background-color: var(--color-primary);
     transition: all 300ms;
 }
 .nav-link:hover::after {
@@ -395,7 +395,7 @@ const handleLogout = () => {
     border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(34, 211, 238, 0.2);
+    background: var(--color-primary);
 }
 
 /* Glass Utility */

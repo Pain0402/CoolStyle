@@ -51,12 +51,16 @@ const formatCurrency = (value: number) => {
 };
 
 const isNew = props.product.id > 300 || props.product.isNew;
+
+const handleImageError = (e: Event) => {
+    (e.target as HTMLImageElement).src = 'https://placehold.co/600x800/1a1a1a/FFF?text=CoolStyle';
+};
 </script>
 
 <template>
   <router-link :to="`/product/${product.slug}`" class="group relative block h-full">
     <!-- Glow Effect Background -->
-    <div class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-75 blur transition duration-500 will-change-[opacity]"></div>
+    <div class="absolute -inset-0.5 bg-gradient-to-r from-theme-primary to-theme-secondary rounded-2xl opacity-0 group-hover:opacity-75 blur transition duration-500 will-change-[opacity]"></div>
     
     <!-- Main Card Content -->
     <div class="relative h-full bg-[#0f1012] rounded-2xl overflow-hidden border border-white/5 flex flex-col transition-transform duration-300 group-hover:-translate-y-1">
@@ -64,7 +68,7 @@ const isNew = props.product.id > 300 || props.product.isNew;
       <!-- Image Section -->
       <div class="relative aspect-[3/4] overflow-hidden bg-white/5">
         <!-- New Badge -->
-        <span v-if="isNew" class="absolute top-3 left-3 z-20 px-3 py-1 text-xs font-bold text-black bg-[#00f2ea] rounded-full shadow-[0_0_10px_rgba(0,242,234,0.5)]">
+        <span v-if="isNew" class="absolute top-3 left-3 z-20 px-3 py-1 text-xs font-bold text-black bg-theme-primary rounded-full shadow-theme-primary">
           NEW
         </span>
 
@@ -79,7 +83,8 @@ const isNew = props.product.id > 300 || props.product.isNew;
 
         <!-- Product Image -->
         <img 
-          :src="product.thumbnailUrl || 'https://placehold.co/400x600/1a1a1a/FFF?text=CoolStyle'" 
+          :src="product.thumbnailUrl || 'https://placehold.co/600x800/1a1a1a/FFF?text=CoolStyle'" 
+          @error="handleImageError"
           alt="Product" 
           loading="lazy"
           class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
@@ -89,7 +94,7 @@ const isNew = props.product.id > 300 || props.product.isNew;
         <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
              <button 
                 @click="addToCart"
-                class="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-3 rounded-xl hover:bg-[#00f2ea] hover:shadow-[0_0_15px_rgba(0,242,234,0.4)] transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
+                class="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-3 rounded-xl hover:bg-theme-primary hover:shadow-theme-primary transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
              >
                 <ShoppingBag :size="18" /> Thêm vào giỏ
              </button>
@@ -99,12 +104,12 @@ const isNew = props.product.id > 300 || props.product.isNew;
       <!-- Content Section -->
       <div class="p-4 flex flex-col flex-1 gap-2">
          <!-- Category -->
-         <p class="text-xs font-medium text-cyan-400 uppercase tracking-widest bg-cyan-500/10 w-fit px-2 py-0.5 rounded">
+         <p class="text-xs font-medium text-theme-primary uppercase tracking-widest bg-white/5 border border-theme-primary/30 w-fit px-2 py-0.5 rounded">
             {{ product.categoryName || 'Sản phẩm' }}
          </p>
 
          <!-- Name -->
-         <h3 class="font-display font-semibold text-white text-lg leading-tight line-clamp-2 group-hover:text-[#00f2ea] transition-colors">
+         <h3 class="font-display font-semibold text-white text-lg leading-tight line-clamp-2 group-hover:text-theme-primary transition-colors">
             {{ product.name }}
          </h3>
 
@@ -114,7 +119,7 @@ const isNew = props.product.id > 300 || props.product.isNew;
                 {{ formatCurrency(product.basePrice) }}
             </span>
             
-            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/50 group-hover:bg-[#00f2ea] group-hover:text-black transition-all">
+            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/50 group-hover:bg-theme-primary group-hover:text-black transition-all">
                 <Eye :size="16" />
             </div>
          </div>

@@ -13,6 +13,7 @@ const loading = ref(true);
 const error = ref('');
 const timeLeft = ref({ hours: '02', minutes: '00', seconds: '00' });
 let intervalId: any = null;
+let pollInterval: any = null;
 
 const startCountdown = () => {
     let duration = 2 * 60 * 60; // 2 hours in seconds
@@ -42,7 +43,8 @@ const categories = [
 ];
 
 // Fetch Data
-const fetchProducts = async () => {
+const fetchProducts = async (isBackground = false) => {
+    if (!isBackground) loading.value = true;
     try {
         const response: any = await apiClient.get('/products');
         let allItems = response as any[];
@@ -67,10 +69,10 @@ const fetchProducts = async () => {
         // Get only first 8 products for Home (now showing main clothes first)
         products.value = allItems.slice(0, 8); 
     } catch (err) {
-        error.value = 'Không thể tải sản phẩm. Vui lòng kiểm tra kết nối.';
+        if (!isBackground) error.value = 'Không thể tải sản phẩm. Vui lòng kiểm tra kết nối.';
         console.error(err);
     } finally {
-        loading.value = false;
+        if (!isBackground) loading.value = false;
     }
 };
 
@@ -106,10 +108,16 @@ onMounted(() => {
     // Load saved theme
     const savedTheme = localStorage.getItem('coolstyle-theme') || 'default';
     setTheme(savedTheme);
+
+    // Auto-refresh data every 5 seconds (to catch new images)
+    pollInterval = setInterval(() => {
+        fetchProducts(true);
+    }, 5000);
 });
 
 onUnmounted(() => {
     if (intervalId) clearInterval(intervalId);
+    if (pollInterval) clearInterval(pollInterval);
 });
 </script>
 
@@ -130,8 +138,8 @@ onUnmounted(() => {
             <!-- Left: Content (Pointer Events Auto to interact with buttons) -->
             <div class="pointer-events-auto" data-aos="fade-right" data-aos-duration="1000">
                 <div class="flex items-center gap-3 mb-6">
-                    <span class="w-12 h-[2px] bg-cyan-500"></span>
-                    <span class="text-cyan-400 font-bold uppercase tracking-[0.3em] text-sm">Trend 2025</span>
+                    <span class="w-12 h-[2px] bg-theme-primary"></span>
+                    <span class="text-theme-primary font-bold uppercase tracking-[0.3em] text-sm">Trend 2025</span>
                 </div>
 
                 <h1 class="ml11 font-display text-6xl md:text-8xl font-black text-white leading-[0.9] mb-8 overflow-hidden">
@@ -144,11 +152,11 @@ onUnmounted(() => {
                 </p>
 
                 <div class="flex items-center gap-6 animate-fade-in-up" style="animation-delay: 0.7s">
-                    <button class="btn-primary bg-white text-black hover:bg-cyan-400 hover:text-black border-none px-10 py-4 text-lg shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                    <button class="btn-primary bg-white text-black hover:bg-theme-primary hover:text-black border-none px-10 py-4 text-lg shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                         Shop Now
                     </button>
-                    <button class="flex items-center gap-3 text-white font-bold hover:text-cyan-400 transition group">
-                        <span class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-black group-hover:border-cyan-500 transition-all">
+                    <button class="flex items-center gap-3 text-white font-bold hover:text-theme-primary transition group">
+                        <span class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-theme-primary group-hover:text-black group-hover:border-theme-primary transition-all">
                              <ArrowRight :size="18" />
                         </span>
                         <span>View Lookbook</span>
@@ -198,9 +206,9 @@ onUnmounted(() => {
                         </div>
                         <div>
                             <p class="text-white font-bold text-sm">Air Jordan 1 Retro High OG ‘Chicago’ 2015</p>
-                            <p class="text-cyan-400 font-bold text-xs">$89.00</p>
+                            <p class="text-theme-primary font-bold text-xs">$89.00</p>
                         </div>
-                        <button class="ml-auto w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-500 hover:text-black transition">
+                        <button class="ml-auto w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-theme-primary hover:text-black transition">
                             <ArrowRight :size="14"/>
                         </button>
                     </div>
@@ -225,7 +233,7 @@ onUnmounted(() => {
                      <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Danh Mục <span class="text-neon">Trending</span></h2>
                      <p class="text-gray-400 text-lg">Những items được săn đón nhiều nhất</p>
                  </div>
-                 <button class="text-white hover:text-cyan-400 transition font-medium flex items-center gap-2">
+                 <button class="text-white hover:text-theme-primary transition font-medium flex items-center gap-2">
                     Khám phá tất cả <ArrowRight :size="18"/>
                  </button>
              </div>
@@ -243,7 +251,7 @@ onUnmounted(() => {
                       <!-- Content -->
                       <div class="absolute bottom-6 left-6 z-10">
                           <span class="px-2 py-1 bg-white/10 backdrop-blur text-xs rounded text-white mb-2 inline-block border border-white/10">{{ cat.count }} Items</span>
-                          <h3 class="text-3xl font-display font-bold text-white group-hover:text-cyan-400 transition-colors">{{ cat.name }}</h3>
+                          <h3 class="text-3xl font-display font-bold text-white group-hover:text-theme-primary transition-colors">{{ cat.name }}</h3>
                       </div>
                   </div>
              </div>
@@ -275,7 +283,7 @@ onUnmounted(() => {
                     </div>
                 </div>
                 
-                <button class="flex items-center gap-2 text-purple-300 font-bold hover:text-white transition group text-lg">
+                <button class="flex items-center gap-2 text-theme-secondary font-bold hover:text-white transition group text-lg">
                     View All Deals <ArrowRight :size="20" class="group-hover:translate-x-1 transition-transform"/>
                 </button>
             </div>
@@ -297,7 +305,7 @@ onUnmounted(() => {
     <section class="py-32 bg-black/20 backdrop-blur-sm border-y border-white/5 relative z-10">
         <div class="container mx-auto px-6 relative z-10">
              <div class="text-center mb-20" data-aos="fade-up">
-                 <span class="text-cyan-500 font-bold uppercase tracking-[0.2em] text-sm mb-4 block">New Drops</span>
+                 <span class="text-theme-primary font-bold uppercase tracking-[0.2em] text-sm mb-4 block">New Drops</span>
                  <h2 class="font-display text-5xl font-black text-white mb-6">Mới Lên Kệ</h2>
                  <p class="text-gray-400 text-lg max-w-2xl mx-auto">Cập nhật xu hướng thời trang mới nhất. Đừng bỏ lỡ những items giới hạn.</p>
              </div>
@@ -329,8 +337,8 @@ onUnmounted(() => {
              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                  <!-- Feature 1 -->
                  <div class="glass p-10 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up">
-                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors">
-                         <Zap :size="32" class="text-cyan-400" />
+                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-theme-primary/20 group-hover:border-theme-primary/50 transition-colors">
+                         <Zap :size="32" class="text-theme-primary" />
                      </div>
                      <h3 class="text-xl font-bold text-white mb-4 font-display">Fast Delivery</h3>
                      <p class="text-gray-400 leading-relaxed">Giao hàng hỏa tốc nội thành trong 2h. Đóng gói cao cấp bảo vệ sản phẩm.</p>
@@ -338,8 +346,8 @@ onUnmounted(() => {
 
                  <!-- Feature 2 -->
                  <div class="glass p-10 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="100">
-                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-purple-500/20 group-hover:border-purple-500/50 transition-colors">
-                         <ShieldCheck :size="32" class="text-purple-400" />
+                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-theme-secondary/20 group-hover:border-theme-secondary/50 transition-colors">
+                         <ShieldCheck :size="32" class="text-theme-secondary" />
                      </div>
                      <h3 class="text-xl font-bold text-white mb-4 font-display">Premium Quality</h3>
                      <p class="text-gray-400 leading-relaxed">Cam kết chính hãng 100%. Bảo hành đường may trọn đời.</p>
@@ -347,8 +355,8 @@ onUnmounted(() => {
 
                  <!-- Feature 3 -->
                  <div class="glass p-10 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="200">
-                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-pink-500/20 group-hover:border-pink-500/50 transition-colors">
-                         <ShoppingBag :size="32" class="text-pink-400" />
+                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-theme-accent/20 group-hover:border-theme-accent/50 transition-colors">
+                         <ShoppingBag :size="32" class="text-theme-accent" />
                      </div>
                      <h3 class="text-xl font-bold text-white mb-4 font-display">Easy Returns</h3>
                      <p class="text-gray-400 leading-relaxed">Đổi trả không cần lý do trong 30 ngày. Hoàn tiền ngay lập tức.</p>
