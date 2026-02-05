@@ -28,4 +28,9 @@
     <ProjectReference Include="..\FashionEcommerce.Infrastructure\FashionEcommerce.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\products_scraped.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

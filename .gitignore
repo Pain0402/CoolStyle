@@ -38,4 +38,14 @@ logs/
 
 # OS files
 .DS_Store
-Thumbs.db
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Scraper Data (Temporary/Local)
+src/Backend/FashionEcommerce.Scraper/*.json
+!src/Backend/FashionEcommerce.Scraper/requirements.txt
+

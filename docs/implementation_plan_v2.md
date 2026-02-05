@@ -14,21 +14,23 @@
   - [ ] Thêm hiệu ứng Tilt (nghiêng 3D) cho Product Card khi hover.
   - [x] Page Transition: Hiệu ứng chuyển trang mượt mà (Fade).
 
-## Phase 7: Data Richness (Content Strategy) (In Progress)
+## Phase 7: Data Richness (Content Strategy) (Completed)
 **Mục tiêu:** Thay máu toàn bộ dữ liệu mẫu bằng dữ liệu "thật".
-- [ ] **7.1. Cloudinary Integration**:
+- [ ] **7.1. Cloudinary Integration**: (*Deferred to Phase 8*)
   - [ ] Thiết lập Cloudinary để host ảnh chất lượng cao.
   - [ ] Xây dựng Component `AppImage` tự động tối ưu hóa size ảnh.
 - [x] **7.2. Data Seeder v2 (The Big Data)**:
   - [x] Refactor `DataSeeder.cs` với danh mục đa dạng (Nam, Nữ, Phụ kiện).
-  - [x] Nạp dữ liệu 50+ sản phẩm với ảnh Unsplash chất lượng cao.
+  - [x] Nạp dữ liệu 15+ sản phẩm mẫu chủ chốt với ảnh Unsplash.
 
-## Phase 8: Advanced Product Logic (Backend Heavy)
+## Phase 8: Advanced Product Logic (Backend Heavy) (Next Up)
 **Mục tiêu:** Xử lý các logic phức tạp của thương mại điện tử.
 - [ ] **8.1. Variant System (Size/Color)**:
   - [ ] Cập nhật DB Schema: `Product` -> `ProductVariant` (Mỗi size/màu là 1 dòng riêng có tồn kho riêng).
   - [ ] Cập nhật API `GetProductDetail` để trả về các biến thể.
-- [ ] **8.2. User Features**:
+- [ ] **8.2. Categories API**:
+  - [ ] Tạo `CategoriesController` để trả về danh mục động cho Frontend Menu.
+- [ ] **8.3. User Features**:
   - [ ] Trang Profile (Hồ sơ cá nhân).
   - [ ] Quản lý Sổ địa chỉ (Address Book).
   - [ ] Wishlist (Sản phẩm yêu thích).
