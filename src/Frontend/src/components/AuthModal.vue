@@ -44,13 +44,13 @@ const handleSubmit = async () => {
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')"></div>
 
     <!-- Modal Content -->
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl relative overflow-hidden z-10 animate-fade-in-up">
+    <div class="bg-[#18191c] w-full max-w-md rounded-2xl shadow-2xl relative overflow-hidden z-10 animate-fade-in-up border border-white/10">
         
         <!-- Header -->
-        <div class="flex justify-between items-center p-6 border-b">
-            <h3 class="text-xl font-bold">{{ isLogin ? 'Đăng nhập' : 'Đăng ký tài khoản' }}</h3>
-            <button @click="$emit('close')" class="text-gray-400 hover:text-black transition">
-                <X :size="24" />
+        <div class="flex justify-between items-center p-6 border-b border-white/10">
+            <h3 class="text-xl font-bold text-white font-display">{{ isLogin ? 'Đăng nhập' : 'Đăng ký tài khoản' }}</h3>
+            <button @click="$emit('close')" class="text-gray-400 hover:text-white transition p-2 hover:bg-white/10 rounded-full">
+                <X :size="20" />
             </button>
         </div>
 
@@ -59,29 +59,29 @@ const handleSubmit = async () => {
             <form @submit.prevent="handleSubmit" class="space-y-5">
                 
                 <div v-if="!isLogin">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
-                    <input v-model="formData.fullName" type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition" placeholder="Nguyễn Văn A" />
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Họ tên</label>
+                    <input v-model="formData.fullName" type="text" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition placeholder-gray-600" placeholder="Nguyễn Văn A" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input v-model="formData.email" type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition" placeholder="email@example.com" />
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Email</label>
+                    <input v-model="formData.email" type="email" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition placeholder-gray-600" placeholder="email@example.com" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
-                    <input v-model="formData.password" type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition" placeholder="••••••••" />
+                    <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Mật khẩu</label>
+                    <input v-model="formData.password" type="password" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition placeholder-gray-600" placeholder="••••••••" />
                 </div>
 
-                <button type="submit" :disabled="loading" class="w-full btn-primary flex justify-center items-center gap-2">
-                    <span v-if="loading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <button type="submit" :disabled="loading" class="w-full btn-primary bg-white text-black hover:bg-cyan-400 transition flex justify-center items-center gap-2 shadow-none hover:shadow-[0_0_15px_rgba(0,242,234,0.4)]">
+                    <span v-if="loading" class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
                     {{ isLogin ? 'Đăng nhập' : 'Tạo tài khoản' }}
                 </button>
             </form>
 
-            <div class="mt-6 text-center text-sm text-gray-500">
-                <span v-if="isLogin">Chưa có tài khoản? <button @click="isLogin = false" class="text-black font-semibold hover:underline">Đăng ký ngay</button></span>
-                <span v-else>Đã có tài khoản? <button @click="isLogin = true" class="text-black font-semibold hover:underline">Đăng nhập</button></span>
+            <div class="mt-6 text-center text-sm text-gray-400">
+                <span v-if="isLogin">Chưa có tài khoản? <button @click="isLogin = false" class="text-white font-bold hover:text-cyan-400">Đăng ký ngay</button></span>
+                <span v-else>Đã có tài khoản? <button @click="isLogin = true" class="text-white font-bold hover:text-cyan-400">Đăng nhập</button></span>
             </div>
         </div>
     </div>

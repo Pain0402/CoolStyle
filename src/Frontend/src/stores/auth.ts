@@ -42,11 +42,13 @@ export const useAuthStore = defineStore('auth', () => {
         const response: any = await apiClient.post('/auth/register', payload);
         // Explicitly cast or access properties known to exist in response
         setAuth(response.token, { email: response.email, fullName: response.fullName });
+        return true;
     };
 
     const login = async (payload: any) => {
         const response: any = await apiClient.post('/auth/login', payload);
         setAuth(response.token, { email: response.email, fullName: response.fullName });
+        return true;
     };
 
     return { user, token, isAuthenticated, login, register, logout };

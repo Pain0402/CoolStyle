@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { ShoppingBag, Search, Menu, User, LogOut } from 'lucide-vue-next';
+import { ShoppingBag, Search, Menu, User, LogOut, Instagram, Facebook, Twitter, ArrowRight } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/auth';
 import { useCartStore } from '../stores/cart';
 import { useToast } from 'vue-toastification';
@@ -22,99 +22,186 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col font-sans text-gray-900">
-    <!-- Navbar -->
-    <header class="h-20 border-b border-gray-100 flex items-center justify-between px-6 md:px-12 sticky top-0 bg-white/90 backdrop-blur-md z-50">
-      
-      <!-- Mobile Menu -->
-      <button class="md:hidden p-2">
-        <Menu :size="24" />
-      </button>
-
-      <!-- Logo -->
-      <h1 class="text-2xl font-extrabold tracking-tighter uppercase">Coolstyle.</h1>
-      
-      <!-- Desktop Nav -->
-      <nav class="hidden md:flex gap-8 text-sm font-semibold uppercase tracking-wide">
-        <a href="#" class="hover:text-blue-600 transition">Nam</a>
-        <a href="#" class="hover:text-blue-600 transition">Nữ</a>
-        <a href="#" class="hover:text-blue-600 transition">Bộ sưu tập</a>
-        <a href="#" class="text-red-500 hover:text-red-600 transition">Sale</a>
-      </nav>
-      
-      <!-- Icons -->
-      <div class="flex gap-6 items-center">
-        <button class="hover:text-blue-600 transition"><Search :size="22" stroke-width="2" /></button>
-        
-        <!-- User Logic -->
-        <div class="relative">
-          <button v-if="authStore.isAuthenticated" @click="showUserMenu = !showUserMenu" class="hover:text-blue-600 transition flex items-center gap-2">
-             <User :size="22" stroke-width="2" />
-             <span class="text-sm font-medium hidden lg:block">{{ authStore.user?.fullName }}</span>
-          </button>
-          <button v-else @click="showAuthModal = true" class="hover:text-blue-600 transition">
-             <User :size="22" stroke-width="2" />
+  <div class="min-h-screen flex flex-col font-sans bg-[#050505] text-white selection:bg-cyan-500/30 selection:text-cyan-100">
+    <!-- Navbar (Neo-Glass) -->
+    <header class="h-20 fixed w-full top-0 z-50 transition-all duration-300 glass">
+      <div class="h-full container mx-auto px-6 flex items-center justify-between">
+          
+          <!-- Mobile Menu -->
+          <button class="md:hidden p-2 text-white hover:text-cyan-400 transition">
+            <Menu :size="24" />
           </button>
 
-          <!-- User Dropdown -->
-          <div v-if="showUserMenu" class="absolute right-0 mt-4 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fade-in-up">
-              <a href="#" class="block px-4 py-2 hover:bg-gray-50 text-sm">Tài khoản của tôi</a>
-              <a href="#" class="block px-4 py-2 hover:bg-gray-50 text-sm">Đơn hàng</a>
-              <div class="border-t my-1"></div>
-              <button @click="handleLogout" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-red-600 flex items-center gap-2">
-                 <LogOut :size="16" /> Đăng xuất
+          <!-- Logo -->
+          <router-link to="/" class="text-2xl font-display font-black tracking-[0.1em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 hover:to-cyan-400 transition-colors">
+            CoolStyle
+          </router-link>
+          
+          <!-- Desktop Nav -->
+          <nav class="hidden md:flex gap-10 text-sm font-bold uppercase tracking-widest">
+            <router-link to="/" class="nav-link">Home</router-link>
+            <a href="#" class="nav-link">Men</a>
+            <a href="#" class="nav-link">Women</a>
+            <a href="#" class="nav-link text-neon">Collections</a>
+            <a href="#" class="text-red-500 hover:text-red-400 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] transition">Sale</a>
+          </nav>
+          
+          <!-- Icons -->
+          <div class="flex gap-6 items-center">
+            <button class="icon-btn"><Search :size="20" stroke-width="2.5" /></button>
+            
+            <!-- User Logic -->
+            <div class="relative">
+              <button v-if="authStore.isAuthenticated" @click="showUserMenu = !showUserMenu" class="icon-btn flex items-center gap-2">
+                 <User :size="20" stroke-width="2.5" />
+                 <span class="text-xs font-bold hidden lg:block">{{ authStore.user?.fullName }}</span>
               </button>
-          </div>
-        </div>
+              <button v-else @click="showAuthModal = true" class="icon-btn">
+                 <User :size="20" stroke-width="2.5" />
+              </button>
 
-        <button @click="showCartDrawer = true" class="hover:text-blue-600 transition relative">
-            <ShoppingBag :size="22" stroke-width="2" />
-            <span v-if="cartStore.totalItems > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">{{ cartStore.totalItems }}</span>
-        </button>
+              <!-- User Dropdown (Glass) -->
+              <div v-if="showUserMenu" class="absolute right-0 mt-6 w-56 glass rounded-xl py-2 z-50 animate-fade-in-up border border-white/10">
+                  <div class="px-4 py-3 border-b border-white/10 mb-2">
+                      <p class="text-xs text-gray-400">Signed in as</p>
+                      <p class="font-bold text-white truncate">{{ authStore.user?.email }}</p>
+                  </div>
+                  <router-link to="/profile" class="block px-4 py-2 hover:bg-white/10 text-sm text-gray-300 hover:text-white transition">My Profile</router-link>
+                  <router-link to="/profile" class="block px-4 py-2 hover:bg-white/10 text-sm text-gray-300 hover:text-white transition">Orders</router-link>
+                  <div class="border-t border-white/10 my-1"></div>
+                  <button @click="handleLogout" class="w-full text-left px-4 py-2 hover:bg-red-500/20 text-sm text-red-500 hover:text-red-400 flex items-center gap-2 transition">
+                     <LogOut :size="16" /> Sign out
+                  </button>
+              </div>
+            </div>
+
+            <button @click="showCartDrawer = true" class="icon-btn relative group">
+                <ShoppingBag :size="20" stroke-width="2.5" />
+                <span v-if="cartStore.totalItems > 0" class="absolute -top-1 -right-1 bg-[#00f2ea] text-black text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow-[0_0_10px_rgba(0,242,234,0.6)] animate-pulse">
+                    {{ cartStore.totalItems }}
+                </span>
+            </button>
+          </div>
       </div>
     </header>
 
-    <main class="flex-1">
+    <main class="flex-1 pt-20">
       <slot />
     </main>
 
     <AuthModal v-if="showAuthModal" @close="showAuthModal = false" />
     <CartDrawer v-if="showCartDrawer" @close="showCartDrawer = false" />
 
-    <footer class="bg-black text-white py-16 px-6">
-      <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+    <!-- Huge Footer -->
+    <footer class="bg-black text-white pt-24 pb-12 border-t border-white/5 relative overflow-hidden">
+       <!-- Decoration -->
+       <h1 class="absolute bottom-0 left-1/2 -translate-x-1/2 text-[15vw] font-black text-white/5 whitespace-nowrap select-none pointer-events-none font-display">
+           COOLSTYLE
+       </h1>
+
+      <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 relative z-10 mb-20">
         <div>
-           <h4 class="text-lg font-bold mb-4">COOLSTYLE</h4>
-           <p class="text-gray-400 text-sm">Thời trang tối giản, chất lượng cao dành cho người Việt.</p>
+           <h4 class="text-2xl font-display font-bold mb-6">COOLSTYLE.</h4>
+           <p class="text-gray-400 text-sm leading-relaxed mb-6">
+               Định hình phong cách tương lai. <br>
+               Chất lượng vượt trội, thiết kế đột phá.
+           </p>
+           <div class="flex gap-4">
+               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#00f2ea] hover:text-black hover:border-transparent transition-all duration-300">
+                   <Instagram :size="18" />
+               </a>
+               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-600 hover:text-white hover:border-transparent transition-all duration-300">
+                   <Facebook :size="18" />
+               </a>
+               <a href="#" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-sky-400 hover:text-white hover:border-transparent transition-all duration-300">
+                   <Twitter :size="18" />
+               </a>
+           </div>
         </div>
+        
+        <!-- Links -->
         <div>
-           <h4 class="font-bold mb-4">Về chúng tôi</h4>
-           <ul class="space-y-2 text-sm text-gray-400">
-             <li>Câu chuyện</li>
-             <li>Tuyển dụng</li>
+           <h4 class="font-bold mb-6 uppercase tracking-widest text-sm">Shop</h4>
+           <ul class="space-y-3 text-sm text-gray-400">
+             <li><a href="#" class="hover:text-cyan-400 transition">All Products</a></li>
+             <li><a href="#" class="hover:text-cyan-400 transition">New Arrivals</a></li>
+             <li><a href="#" class="hover:text-cyan-400 transition">Accessories</a></li>
+             <li><a href="#" class="hover:text-cyan-400 transition">Sales</a></li>
            </ul>
         </div>
          <div>
-           <h4 class="font-bold mb-4">Hỗ trợ</h4>
-           <ul class="space-y-2 text-sm text-gray-400">
-             <li>Chính sách đổi trả</li>
-             <li>Bảo mật</li>
+           <h4 class="font-bold mb-6 uppercase tracking-widest text-sm">Support</h4>
+           <ul class="space-y-3 text-sm text-gray-400">
+             <li><a href="#" class="hover:text-cyan-400 transition">FAQ</a></li>
+             <li><a href="#" class="hover:text-cyan-400 transition">Return Policy</a></li>
+             <li><a href="#" class="hover:text-cyan-400 transition">Terms of Service</a></li>
+             <li><a href="#" class="hover:text-cyan-400 transition">Privacy</a></li>
            </ul>
         </div>
+        
+        <!-- Newsletter -->
+        <div>
+            <h4 class="font-bold mb-6 uppercase tracking-widest text-sm">Stay in the loop</h4>
+            <div class="flex">
+                <input type="email" placeholder="Enter your email" class="bg-white/5 border border-white/10 rounded-l-lg px-4 py-3 text-sm w-full focus:outline-none focus:border-cyan-500/50 transition placeholder-gray-600">
+                <button class="bg-white text-black font-bold px-4 rounded-r-lg hover:bg-cyan-400 transition">
+                    <ArrowRight :size="18" />
+                </button>
+            </div>
+        </div>
       </div>
-      <div class="mt-12 text-center text-xs text-gray-600 border-t border-gray-800 pt-8">
-        © 2026 Coolstyle. All rights reserved.
+      
+      <div class="container mx-auto px-6 text-center text-xs text-gray-700 font-medium">
+        © 2026 Coolstyle Inc. Designed for the Future.
       </div>
     </footer>
   </div>
 </template>
 
 <style scoped>
+.nav-link {
+    color: #cbd5e1; /* gray-300 */
+    position: relative;
+    transition: color 150ms;
+}
+.nav-link:hover {
+    color: #ffffff;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #22d3ee; /* cyan-400 */
+    transition: all 300ms;
+}
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.icon-btn {
+    color: #9ca3af; /* gray-400 */
+    padding: 0.5rem; /* p-2 */
+    border-radius: 9999px; /* rounded-full */
+    transition: all 300ms;
+    backdrop-filter: blur(4px); /* backdrop-blur-sm */
+}
+.icon-btn:hover {
+    color: #ffffff;
+    background-color: #1f2937; /* bg-gray-800 */
+}
+.icon-btn:active {
+    transform: scale(0.95);
+}
+
 @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in-up {
-    animation: fade-in-up 0.2s ease-out;
+    animation: fade-in-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 </style>

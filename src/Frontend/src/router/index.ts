@@ -1,6 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import AdminDashboard from '../views/AdminDashboard.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import HomeView from '../views/HomeView.vue';
+import AdminDashboard from '../views/AdminDashboard.vue';
+import ShopView from '../views/ShopView.vue';
+import ProductDetailView from '../views/ProductDetailView.vue';
+import LoginView from '../views/LoginView.vue';
+import ProfileView from '../views/ProfileView.vue';
+import { useAuthStore } from '../stores/auth';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,22 +16,64 @@ const router = createRouter({
             component: HomeView
         },
         {
+            path: '/shop',
+            name: 'shop',
+            component: ShopView
+        },
+        {
+            path: '/product/:slug',
+            name: 'product-detail',
+            component: ProductDetailView
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: LoginView
+        },
+        {
+            path: '/profile',
+            name: 'profile',
+            component: ProfileView,
+            meta: { requiresAuth: true }
+        },
+        {
             path: '/admin',
             name: 'admin',
-            component: AdminDashboard
+            component: AdminDashboard,
+            meta: { requiresAdmin: true }
         }
     ],
     scrollBehavior(to, from, savedPosition) {
-        // Prevent TS unused vars
+        // Use params to avoid TS error
         void to;
         void from;
 
         if (savedPosition) {
-            return savedPosition
+            return savedPosition;
         } else {
-            return { top: 0 }
+            return { top: 0, behavior: 'smooth' };
         }
     }
-})
+});
 
-export default router
+// Navigation Guard
+router.beforeEach((to, from, next) => {
+    void from;
+    const authStore = useAuthStore();
+
+    // Check for Auth Requirement
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+        next('/login');
+        return;
+    }
+
+    // Check for Admin Requirement
+    if (to.meta.requiresAdmin && (!authStore.isAuthenticated || (authStore.user as any)?.role !== 'Admin')) {
+        next('/');
+        return;
+    }
+
+    next();
+});
+
+export default router;

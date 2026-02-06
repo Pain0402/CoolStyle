@@ -3,25 +3,27 @@ import { ref, onMounted } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
 import apiClient from '../utils/api';
-import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-vue-next';
+import { ArrowRight, ShoppingBag, Zap, ShieldCheck } from 'lucide-vue-next';
 
 // State
 const products = ref<any[]>([]);
 const loading = ref(true);
 const error = ref('');
 
-// Static Categories Data for UI Demo (Will be Dynamic later)
+// Updated Categories for 2025 Look
 const categories = [
-    { id: 1, name: 'Thời trang Nam', image: 'https://images.unsplash.com/photo-1516257984-b1b4d8c9230d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', count: '120+' },
-    { id: 2, name: 'Thời trang Nữ', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', count: '240+' },
-    { id: 3, name: 'Phụ kiện', image: 'https://images.unsplash.com/photo-1576053139778-7e32f2ae3cfd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', count: '80+' },
+    { id: 1, name: 'Streetwear', image: 'https://images.unsplash.com/photo-1523398002811-999ca8dec234?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', count: '120+', span: 'md:col-span-2 md:row-span-2' },
+    { id: 2, name: 'Accessories', image: 'https://images.unsplash.com/photo-1576053139778-7e32f2ae3cfd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', count: '80+', span: 'md:col-span-1 md:row-span-1' },
+    { id: 3, name: 'Sneakers', image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', count: '45+', span: 'md:col-span-1 md:row-span-1' },
+    { id: 4, name: 'Collections', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', count: '240+', span: 'md:col-span-2 md:row-span-1' },
 ];
 
 // Fetch Data
 const fetchProducts = async () => {
     try {
         const response: any = await apiClient.get('/products');
-        products.value = response as any[]; 
+        // Get only first 8 products for Home
+        products.value = (response as any[]).slice(0, 8); 
     } catch (err) {
         error.value = 'Không thể tải sản phẩm. Vui lòng kiểm tra kết nối.';
         console.error(err);
@@ -37,143 +39,169 @@ onMounted(() => {
 
 <template>
   <MainLayout>
-    <!-- 1. Hero Section (Premium 3D feel) -->
-    <div class="relative bg-slate-900 text-white min-h-[85vh] flex items-center overflow-hidden">
-        <!-- Background Overlay -->
-        <div class="absolute inset-0 z-0">
-             <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80" 
-                  class="w-full h-full object-cover opacity-40 hover:scale-105 transition duration-[3s]" alt="Hero Background">
-        </div>
+    <!-- 1. Hero Section (Neo-Glass Dark Mode) -->
+    <div class="relative bg-black min-h-screen flex items-center overflow-hidden">
+        
+        <!-- Animated Background Blobs -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[100px]"></div>
 
-        <div class="container mx-auto px-6 z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="container mx-auto px-6 z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center pt-20">
+            <!-- Text Content -->
             <div data-aos="fade-right" data-aos-duration="1000">
-                <span class="inline-block py-1 px-3 rounded-full bg-blue-600/30 border border-blue-500/50 text-blue-300 text-sm font-semibold mb-6 backdrop-blur-sm">
-                    🚀 New Collection 2026
-                </span>
-                <h1 class="text-6xl md:text-8xl font-black leading-tight tracking-tighter mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-                    STREET <br> WEAR
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-900/10 backdrop-blur-md mb-8">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    </span>
+                    <span class="text-cyan-300 text-xs font-bold uppercase tracking-widest">New Collection 2025</span>
+                </div>
+
+                <h1 class="font-display text-7xl md:text-9xl font-black leading-[0.9] tracking-tighter mb-8 text-white">
+                    FUTURE <br> 
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ea] to-[#4361ee]">FASHION.</span>
                 </h1>
-                <p class="text-xl text-gray-300 mb-8 max-w-lg font-light leading-relaxed">
-                    Khám phá phong cách thời trang đường phố đậm chất riêng. Thiết kế tối giản, chất liệu cao cấp.
+                
+                <p class="text-xl text-gray-400 mb-10 max-w-lg font-light leading-relaxed">
+                    Khám phá phong cách Neo-Streetwear đậm chất tương lai. Thiết kế tối giản, công nghệ vải tiên tiến và trải nghiệm mua sắm đẳng cấp.
                 </p>
-                <div class="flex gap-4">
-                    <button class="btn-primary flex items-center gap-3 bg-white text-black hover:bg-gray-100 hover:text-black shadow-xl shadow-white/10">
-                        Mua ngay <ArrowRight :size="20"/>
+                
+                <div class="flex flex-wrap gap-6">
+                    <button class="btn-primary flex items-center gap-3 group">
+                        Mua ngay 
+                        <ArrowRight :size="20" class="group-hover:translate-x-1 transition-transform"/>
                     </button>
-                    <button class="px-8 py-3.5 border border-white/30 rounded-xl hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
+                    <button class="btn-ghost backdrop-blur-md flex items-center gap-2">
                         Xem Bộ Sưu Tập
                     </button>
                 </div>
+
+                <!-- Social Proof -->
+                <div class="mt-12 flex items-center gap-4 text-gray-500 text-sm font-medium">
+                    <div class="flex -space-x-4">
+                        <img class="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=1" alt="User">
+                        <img class="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=2" alt="User">
+                        <img class="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=3" alt="User">
+                    </div>
+                    <span>Được yêu thích bởi 10,000+ Fashionistas</span>
+                </div>
             </div>
 
-            <!-- Floating Product Card (Motion) -->
-            <div class="hidden md:block relative" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
-                <div class="relative z-10 bg-white/10 backdrop-blur-lg border border-white/20 p-6 rounded-3xl shadow-2xl transform rotate-3 hover:rotate-0 transition duration-500">
-                     <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
-                          class="rounded-2xl shadow-lg mb-6 w-full h-[500px] object-cover" alt="Featured Product">
-                     <div class="flex justify-between items-end">
-                         <div>
-                             <p class="text-gray-400 text-sm uppercase tracking-widest mb-1">Featured</p>
-                             <h3 class="text-2xl font-bold">Nike Air Max Legacy</h3>
-                         </div>
-                         <div class="text-right">
-                             <p class="text-3xl font-bold text-white">$129.00</p>
-                         </div>
-                     </div>
-                </div>
-                <!-- Decorations -->
-                <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500 rounded-full blur-[100px] opacity-50 z-0"></div>
+            <!-- 3D Card / Visual -->
+            <div class="hidden lg:block relative" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+                 <!-- Main Floating Card -->
+                 <div class="relative z-10 glass-card p-2 transform rotate-6 hover:rotate-2 transition-transform duration-700 w-[450px] mx-auto animate-float">
+                      <div class="relative overflow-hidden rounded-xl">
+                          <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                               class="w-full h-[600px] object-cover" alt="Featured Look">
+                          
+                          <!-- Overlay Info -->
+                          <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 to-transparent pt-20">
+                              <h3 class="text-3xl font-bold text-white font-display mb-1">Cyber Punk Jacket</h3>
+                              <p class="text-cyan-400 font-bold text-xl">$1,299.00</p>
+                          </div>
+                      </div>
+                 </div>
+
+                 <!-- Decorative Elements behind -->
+                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/5 rounded-full z-0"></div>
+                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/5 rounded-full z-0 opacity-50"></div>
             </div>
-        </div>
-        
-        <!-- Scroll Indicator -->
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-gray-400">
-            <span class="text-xs uppercase tracking-widest mb-2 block text-center">Cuộn xuống</span>
-            <ArrowRight class="rotate-90 mx-auto" :size="20"/>
         </div>
     </div>
 
-    <!-- 2. Categories Section -->
-    <section class="py-24 bg-white relative overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4">
-             <div class="text-center mb-16" data-aos="fade-up">
-                 <h2 class="text-4xl md:text-5xl font-black mb-4">Danh Mục Nổi Bật</h2>
-                 <p class="text-gray-500 text-lg">Lựa chọn phong cách phù hợp với bạn</p>
+    <!-- 2. Trending Categories (Bento Grid) -->
+    <section class="py-32 bg-[#050505]">
+        <div class="container mx-auto px-6">
+             <div class="flex justify-between items-end mb-16" data-aos="fade-up">
+                 <div>
+                     <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Danh Mục <span class="text-neon">Trending</span></h2>
+                     <p class="text-gray-400 text-lg">Những items được săn đón nhiều nhất</p>
+                 </div>
+                 <button class="text-white hover:text-cyan-400 transition font-medium flex items-center gap-2">
+                    Khám phá tất cả <ArrowRight :size="18"/>
+                 </button>
              </div>
 
-             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+             <div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-auto md:h-[600px]">
                  <div v-for="(cat, index) in categories" :key="cat.id" 
-                      class="group relative h-[450px] overflow-hidden rounded-2xl cursor-pointer"
-                      :data-aos="'fade-up'" :data-aos-delay="index * 150">
-                     <img :src="cat.image" class="w-full h-full object-cover transition duration-700 group-hover:scale-110" :alt="cat.name">
-                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition"></div>
-                     <div class="absolute bottom-8 left-8 text-white z-10">
-                         <span class="block text-sm text-gray-300 mb-2 font-medium">{{ cat.count }} Sản phẩm</span>
-                         <h3 class="text-3xl font-bold flex items-center gap-3 group-hover:translate-x-2 transition duration-300">
-                             {{ cat.name }} <ArrowRight class="opacity-0 group-hover:opacity-100 transition" :size="24"/>
-                         </h3>
-                     </div>
+                      :class="['group relative rounded-3xl overflow-hidden cursor-pointer border border-white/5', cat.span]"
+                      :data-aos="'fade-up'" :data-aos-delay="index * 100">
+                      
+                      <img :src="cat.image" class="w-full h-full object-cover transition duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" :alt="cat.name">
+                      
+                      <!-- Overlay Gradient -->
+                      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                      
+                      <!-- Content -->
+                      <div class="absolute bottom-6 left-6 z-10">
+                          <span class="px-2 py-1 bg-white/10 backdrop-blur text-xs rounded text-white mb-2 inline-block border border-white/10">{{ cat.count }} Items</span>
+                          <h3 class="text-3xl font-display font-bold text-white group-hover:text-cyan-400 transition-colors">{{ cat.name }}</h3>
+                      </div>
                  </div>
              </div>
         </div>
     </section>
 
-    <!-- 3. New Arrivals (Product Grid) -->
-    <section class="py-24 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4">
-             <div class="flex justify-between items-end mb-12" data-aos="fade-left">
-                <div>
-                    <span class="text-blue-600 font-bold uppercase tracking-widest text-sm mb-2 block">Mới lên kệ</span>
-                    <h2 class="text-4xl font-bold">Sản phẩm mới nhất</h2>
-                </div>
-                <button class="text-sm font-bold border-b-2 border-black pb-1 hover:text-blue-600 hover:border-blue-600 transition">Xem tất cả</button>
+    <!-- 3. New Arrivals -->
+    <section class="py-32 bg-[#0f1012] relative">
+        <div class="container mx-auto px-6 relative z-10">
+             <div class="text-center mb-20" data-aos="fade-up">
+                 <span class="text-cyan-500 font-bold uppercase tracking-[0.2em] text-sm mb-4 block">New Drops</span>
+                 <h2 class="font-display text-5xl font-black text-white mb-6">Mới Lên Kệ</h2>
+                 <p class="text-gray-400 text-lg max-w-2xl mx-auto">Cập nhật xu hướng thời trang mới nhất. Đừng bỏ lỡ những items giới hạn.</p>
              </div>
 
-             <!-- Loading State -->
+             <!-- Loading -->
              <div v-if="loading" class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div v-for="i in 4" :key="i" class="h-96 bg-gray-200 animate-pulse rounded-2xl"></div>
+                <div v-for="i in 4" :key="i" class="aspect-[3/4] bg-white/5 rounded-2xl animate-pulse"></div>
              </div>
-
-             <!-- Error -->
-             <div v-else-if="error" class="text-center py-12 bg-red-50 rounded-xl text-red-500 border border-red-100">
-                {{ error }}
-             </div>
-
-             <!-- Products -->
-             <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
+             
+             <!-- Products Grid -->
+             <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                  <ProductCard v-for="(product, index) in products" :key="product.id" :product="product" 
                               :data-aos="'fade-up'" :data-aos-delay="index * 100" />
              </div>
+             
+             <div class="text-center mt-16">
+                 <button class="btn-ghost">Xem Thêm Sản Phẩm</button>
+             </div>
         </div>
     </section>
 
-    <!-- 4. Quality Promise -->
-    <section class="py-24 bg-black text-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full blur-[150px] opacity-20"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-purple-600 rounded-full blur-[150px] opacity-20"></div>
+    <!-- 4. Features (Quality Promise) -->
+    <section class="py-32 bg-black relative overflow-hidden">
+        <!-- Glows -->
+        <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px]"></div>
         
-        <div class="max-w-7xl mx-auto px-4 text-center relative z-10">
-             <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                 <div class="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm" data-aos="fade-up">
-                     <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
-                         <Sparkles :size="32" />
+        <div class="container mx-auto px-6 relative z-10">
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                 <!-- Feature 1 -->
+                 <div class="glass p-10 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up">
+                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/50 transition-colors">
+                         <Zap :size="32" class="text-cyan-400" />
                      </div>
-                     <h3 class="text-xl font-bold mb-3">Chất lượng cao cấp</h3>
-                     <p class="text-gray-400">Vải Cotton Compact 100% nhập khẩu, co giãn 4 chiều và bền màu theo thời gian.</p>
+                     <h3 class="text-xl font-bold text-white mb-4 font-display">Fast Delivery</h3>
+                     <p class="text-gray-400 leading-relaxed">Giao hàng hỏa tốc nội thành trong 2h. Đóng gói cao cấp bảo vệ sản phẩm.</p>
                  </div>
-                 <div class="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm" data-aos="fade-up" data-aos-delay="100">
-                     <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30">
-                         <ShoppingBag :size="32" />
+
+                 <!-- Feature 2 -->
+                 <div class="glass p-10 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="100">
+                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-purple-500/20 group-hover:border-purple-500/50 transition-colors">
+                         <ShieldCheck :size="32" class="text-purple-400" />
                      </div>
-                     <h3 class="text-xl font-bold mb-3">Đổi trả 30 ngày</h3>
-                     <p class="text-gray-400">Không vừa size? Không ưng ý? Đổi trả miễn phí trong vòng 30 ngày.</p>
+                     <h3 class="text-xl font-bold text-white mb-4 font-display">Premium Quality</h3>
+                     <p class="text-gray-400 leading-relaxed">Cam kết chính hãng 100%. Bảo hành đường may trọn đời.</p>
                  </div>
-                 <div class="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm" data-aos="fade-up" data-aos-delay="200">
-                     <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30">
-                         <Sparkles :size="32" />
+
+                 <!-- Feature 3 -->
+                 <div class="glass p-10 rounded-3xl text-center group hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="200">
+                     <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10 group-hover:bg-pink-500/20 group-hover:border-pink-500/50 transition-colors">
+                         <ShoppingBag :size="32" class="text-pink-400" />
                      </div>
-                     <h3 class="text-xl font-bold mb-3">Giao hàng hỏa tốc</h3>
-                     <p class="text-gray-400">Nhận hàng trong 24h đối với nội thành và 2-3 ngày đối với các tỉnh khác.</p>
+                     <h3 class="text-xl font-bold text-white mb-4 font-display">Easy Returns</h3>
+                     <p class="text-gray-400 leading-relaxed">Đổi trả không cần lý do trong 30 ngày. Hoàn tiền ngay lập tức.</p>
                  </div>
              </div>
         </div>
@@ -182,19 +210,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Gradient Text Animation */
-.text-gradient-animated {
-    background: linear-gradient(to right, #fff, #94a3b8, #fff);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: shine 3s linear infinite;
-}
-
-@keyframes shine {
-    to {
-        background-position: 200% center;
-    }
-}
+/* Scoped styles mainly handle the float animation delay/specifics if needed */
 </style>
