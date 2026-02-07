@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
 import apiClient from '../utils/api';
@@ -9,6 +9,27 @@ import { ArrowRight, ShoppingBag, Zap, ShieldCheck } from 'lucide-vue-next';
 const products = ref<any[]>([]);
 const loading = ref(true);
 const error = ref('');
+const timeLeft = ref({ hours: '02', minutes: '00', seconds: '00' });
+let intervalId: any = null;
+
+const startCountdown = () => {
+    let duration = 2 * 60 * 60; // 2 hours in seconds
+    intervalId = setInterval(() => {
+        const hours = Math.floor(duration / 3600);
+        const minutes = Math.floor((duration % 3600) / 60);
+        const seconds = duration % 60;
+
+        timeLeft.value = {
+            hours: String(hours).padStart(2, '0'),
+            minutes: String(minutes).padStart(2, '0'),
+            seconds: String(seconds).padStart(2, '0')
+        };
+
+        if (--duration < 0) {
+            duration = 2 * 60 * 60; // Reset loop
+        }
+    }, 1000);
+};
 
 // Updated Categories for 2025 Look
 const categories = [
@@ -22,8 +43,27 @@ const categories = [
 const fetchProducts = async () => {
     try {
         const response: any = await apiClient.get('/products');
-        // Get only first 8 products for Home
-        products.value = (response as any[]).slice(0, 8); 
+        let allItems = response as any[];
+
+        // Config: Keywords to identify underwear/accessories (to deprioritize)
+        const secondaryKeywords = ['lót', 'sịp', 'boxer', 'underwear', 'brief', 'tất', 'sock'];
+        
+        // Sort: Main clothing first, Secondary items last
+        allItems.sort((a, b) => {
+            const nameA = (a.name || '').toLowerCase();
+            const nameB = (b.name || '').toLowerCase();
+            // const catA = (a.categoryName || '').toLowerCase(); // If categoryName exists
+
+            const isSecondaryA = secondaryKeywords.some(k => nameA.includes(k));
+            const isSecondaryB = secondaryKeywords.some(k => nameB.includes(k));
+
+            if (isSecondaryA && !isSecondaryB) return 1; // A goes after B
+            if (!isSecondaryA && isSecondaryB) return -1; // A goes before B
+            return 0; // Keep original order otherwise
+        });
+
+        // Get only first 8 products for Home (now showing main clothes first)
+        products.value = allItems.slice(0, 8); 
     } catch (err) {
         error.value = 'Không thể tải sản phẩm. Vui lòng kiểm tra kết nối.';
         console.error(err);
@@ -34,84 +74,109 @@ const fetchProducts = async () => {
 
 onMounted(() => {
     fetchProducts();
+    startCountdown();
+});
+
+onUnmounted(() => {
+    if (intervalId) clearInterval(intervalId);
 });
 </script>
 
 <template>
   <MainLayout>
-    <!-- 1. Hero Section (Neo-Glass Dark Mode) -->
-    <div class="relative bg-black min-h-screen flex items-center overflow-hidden">
+    <!-- 1. Hero Section (Modern Fashion Design) -->
+    <section class="relative min-h-[90vh] flex items-center bg-transparent overflow-hidden pt-16">
         
-        <!-- Animated Background Blobs -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
-        <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[100px]"></div>
+        <!-- Background Elements -->
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-b from-cyan-500/10 to-transparent rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4"></div>
 
-        <div class="container mx-auto px-6 z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center pt-20">
-            <!-- Text Content -->
+        <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+            
+            <!-- Left: Content -->
             <div data-aos="fade-right" data-aos-duration="1000">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-900/10 backdrop-blur-md mb-8">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                    </span>
-                    <span class="text-cyan-300 text-xs font-bold uppercase tracking-widest">New Collection 2025</span>
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="w-12 h-[2px] bg-cyan-500"></span>
+                    <span class="text-cyan-400 font-bold uppercase tracking-[0.3em] text-sm">Trend 2025</span>
                 </div>
 
-                <h1 class="font-display text-7xl md:text-9xl font-black leading-[0.9] tracking-tighter mb-8 text-white">
-                    FUTURE <br> 
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00f2ea] to-[#4361ee]">FASHION.</span>
+                <h1 class="font-display text-6xl md:text-8xl font-black text-white leading-[0.9] mb-8">
+                    STREET <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-400 to-gray-600">WEAR.</span>
+                    <span class="block text-4xl md:text-5xl font-light text-gray-400 mt-2 italic">Collection</span>
                 </h1>
-                
-                <p class="text-xl text-gray-400 mb-10 max-w-lg font-light leading-relaxed">
-                    Khám phá phong cách Neo-Streetwear đậm chất tương lai. Thiết kế tối giản, công nghệ vải tiên tiến và trải nghiệm mua sắm đẳng cấp.
+
+                <p class="text-gray-400 text-lg mb-10 max-w-lg leading-relaxed border-l-2 border-white/10 pl-6">
+                    Định hình phong cách cá nhân với những thiết kế độc bản. Sự kết hợp hoàn hảo giữa công nghệ và thời trang đường phố.
                 </p>
-                
-                <div class="flex flex-wrap gap-6">
-                    <button class="btn-primary flex items-center gap-3 group">
-                        Mua ngay 
-                        <ArrowRight :size="20" class="group-hover:translate-x-1 transition-transform"/>
+
+                <div class="flex items-center gap-6">
+                    <button class="btn-primary bg-white text-black hover:bg-cyan-400 hover:text-black border-none px-10 py-4 text-lg shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                        Shop Now
                     </button>
-                    <button class="btn-ghost backdrop-blur-md flex items-center gap-2">
-                        Xem Bộ Sưu Tập
+                    <button class="flex items-center gap-3 text-white font-bold hover:text-cyan-400 transition group">
+                        <span class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-black group-hover:border-cyan-500 transition-all">
+                             <ArrowRight :size="18" />
+                        </span>
+                        <span>View Lookbook</span>
                     </button>
                 </div>
 
-                <!-- Social Proof -->
-                <div class="mt-12 flex items-center gap-4 text-gray-500 text-sm font-medium">
-                    <div class="flex -space-x-4">
-                        <img class="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=1" alt="User">
-                        <img class="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=2" alt="User">
-                        <img class="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=3" alt="User">
+                <!-- Stats / Trust -->
+                <div class="mt-16 grid grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="text-3xl font-bold text-white font-display">2k+</h4>
+                        <p class="text-gray-500 text-xs uppercase tracking-wider mt-1">New Drops</p>
                     </div>
-                    <span>Được yêu thích bởi 10,000+ Fashionistas</span>
+                    <div>
+                        <h4 class="text-3xl font-bold text-white font-display">50k+</h4>
+                        <p class="text-gray-500 text-xs uppercase tracking-wider mt-1">Happy Users</p>
+                    </div>
+                    <div>
+                        <h4 class="text-3xl font-bold text-white font-display">100%</h4>
+                        <p class="text-gray-500 text-xs uppercase tracking-wider mt-1">Authentic</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- 3D Card / Visual -->
-            <div class="hidden lg:block relative" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
-                 <!-- Main Floating Card -->
-                 <div class="relative z-10 glass-card p-2 transform rotate-6 hover:rotate-2 transition-transform duration-700 w-[450px] mx-auto animate-float">
-                      <div class="relative overflow-hidden rounded-xl">
-                          <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                               class="w-full h-[600px] object-cover" alt="Featured Look">
-                          
-                          <!-- Overlay Info -->
-                          <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 to-transparent pt-20">
-                              <h3 class="text-3xl font-bold text-white font-display mb-1">Cyber Punk Jacket</h3>
-                              <p class="text-cyan-400 font-bold text-xl">$1,299.00</p>
-                          </div>
-                      </div>
-                 </div>
+            <!-- Right: Visual -->
+            <div class="relative h-full flex justify-center lg:justify-end" data-aos="fade-left" data-aos-duration="1200">
+                <!-- Decorative Circle -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] border border-white/10 rounded-full animate-[spin_30s_linear_infinite]"></div>
+                
+                <!-- Main Image Masked -->
+                <div class="relative z-10 w-[350px] md:w-[450px] h-[500px] md:h-[650px] rounded-t-[200px] rounded-b-[40px] overflow-hidden border-4 border-white/5 bg-[#111]">
+                    <img src="https://images.unsplash.com/photo-1540498777894-0d3e5e431525?q=80&w=1500&auto=format&fit=crop" 
+                         class="w-full h-full object-cover hover:scale-105 transition duration-700" alt="Model">
+                    
+                    <!-- Floating Card -->
+                    <div class="absolute bottom-8 left-8 right-8 glass p-4 rounded-xl flex items-center gap-4 animate-float">
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black font-bold">
+                            <ShoppingBag :size="20"/>
+                        </div>
+                        <div>
+                            <p class="text-white font-bold text-sm">Hoodie Oversize Essential</p>
+                            <p class="text-cyan-400 font-bold text-xs">$89.00</p>
+                        </div>
+                        <button class="ml-auto w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-500 hover:text-black transition">
+                            <ArrowRight :size="14"/>
+                        </button>
+                    </div>
+                </div>
 
-                 <!-- Decorative Elements behind -->
-                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/5 rounded-full z-0"></div>
-                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/5 rounded-full z-0 opacity-50"></div>
+                <!-- Floating Tags -->
+                <div class="absolute top-20 -left-10 glass px-4 py-2 rounded-full text-xs font-bold text-white animate-float" style="animation-delay: 1s">
+                    ✨ New Season
+                </div>
+                <div class="absolute bottom-40 -right-4 glass px-4 py-2 rounded-full text-xs font-bold text-white animate-float" style="animation-delay: 2s">
+                    🔥 50% OFF
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- 2. Trending Categories (Bento Grid) -->
-    <section class="py-32 bg-[#050505]">
+    <section class="py-32 bg-transparent relative z-10">
         <div class="container mx-auto px-6">
              <div class="flex justify-between items-end mb-16" data-aos="fade-up">
                  <div>
@@ -143,8 +208,51 @@ onMounted(() => {
         </div>
     </section>
 
+    <!-- 2.5 Flash Sale / Best Sellers -->
+    <section class="py-24 bg-gradient-to-r from-[#1a0033] to-black relative overflow-hidden border-y border-white/5">
+        <!-- Background Effects -->
+        <div class="absolute -left-20 top-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px]"></div>
+        <div class="absolute right-0 bottom-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[80px]"></div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row items-end justify-between mb-12 gap-8">
+                <!-- Header & Timer -->
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <Zap class="text-yellow-400 fill-yellow-400 animate-pulse" :size="24" />
+                        <span class="text-yellow-400 font-bold tracking-[0.2em] uppercase text-sm">Flash Sale Ends In</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-6">
+                        <h2 class="font-display text-5xl md:text-7xl font-black text-white italic tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">BEST SELLERS</h2>
+                        <!-- Countdown -->
+                        <div class="flex gap-1 text-3xl md:text-5xl font-mono font-bold text-white bg-white/5 px-6 py-2 rounded-xl backdrop-blur border border-white/10">
+                            <span>{{ timeLeft.hours }}</span><span class="animate-pulse text-purple-400">:</span>
+                            <span>{{ timeLeft.minutes }}</span><span class="animate-pulse text-purple-400">:</span>
+                            <span>{{ timeLeft.seconds }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="flex items-center gap-2 text-purple-300 font-bold hover:text-white transition group text-lg">
+                    View All Deals <ArrowRight :size="20" class="group-hover:translate-x-1 transition-transform"/>
+                </button>
+            </div>
+
+            <!-- Products Slider (Grid for now) -->
+             <div v-if="loading" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div v-for="i in 4" :key="i" class="aspect-[3/4] bg-white/5 rounded-2xl animate-pulse"></div>
+             </div>
+             
+             <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                 <!-- Showing reversed slice for variety -->
+                 <ProductCard v-for="(product, index) in [...products].reverse().slice(0, 4)" :key="product.id" :product="product" 
+                              :data-aos="'fade-up'" :data-aos-delay="index * 100" />
+             </div>
+        </div>
+    </section>
+
     <!-- 3. New Arrivals -->
-    <section class="py-32 bg-[#0f1012] relative">
+    <section class="py-32 bg-black/20 backdrop-blur-sm border-y border-white/5 relative z-10">
         <div class="container mx-auto px-6 relative z-10">
              <div class="text-center mb-20" data-aos="fade-up">
                  <span class="text-cyan-500 font-bold uppercase tracking-[0.2em] text-sm mb-4 block">New Drops</span>
@@ -170,7 +278,7 @@ onMounted(() => {
     </section>
 
     <!-- 4. Features (Quality Promise) -->
-    <section class="py-32 bg-black relative overflow-hidden">
+    <section class="py-32 bg-black/40 backdrop-blur-md relative overflow-hidden border-t border-white/5">
         <!-- Glows -->
         <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
         <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px]"></div>

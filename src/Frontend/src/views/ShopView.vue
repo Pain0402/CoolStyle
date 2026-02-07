@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
 import apiClient from '../utils/api';
 import { Filter, ChevronDown, SlidersHorizontal } from 'lucide-vue-next';
 
+const route = useRoute();
+const router = useRouter();
 const products = ref<any[]>([]);
 const loading = ref(true);
 const sortBy = ref('newest');
+const selectedCategory = ref('All Products');
 const showMobileFilters = ref(false);
 
 const fetchProducts = async () => {
@@ -21,13 +25,38 @@ const fetchProducts = async () => {
     }
 };
 
-const sortedProducts = computed(() => {
-    // Basic client-side sort for demo
+const filteredProducts = computed(() => {
     let p = [...products.value];
+
+    // Filter by Category
+    if (selectedCategory.value && selectedCategory.value !== 'All Products') {
+        // Simple case-insensitive match for demo
+        p = p.filter(prod => 
+            prod.categoryName?.toLowerCase().includes(selectedCategory.value.toLowerCase()) || 
+            prod.name.toLowerCase().includes(selectedCategory.value.toLowerCase())
+        );
+    }
+
+    // Sort
     if (sortBy.value === 'price-asc') return p.sort((a,b) => a.basePrice - b.basePrice);
     if (sortBy.value === 'price-desc') return p.sort((a,b) => b.basePrice - a.basePrice);
-    return p; // Default (Backend order usually)
+    
+    return p;
 });
+
+const selectCategory = (cat: string) => {
+    selectedCategory.value = cat;
+    // Update URL without reload
+    router.push({ query: { ...route.query, category: cat === 'All Products' ? undefined : cat } });
+};
+
+watch(() => route.query.category, (newCat) => {
+    if (newCat) {
+        selectedCategory.value = newCat as string;
+    } else {
+        selectedCategory.value = 'All Products';
+    }
+}, { immediate: true });
 
 onMounted(() => {
     fetchProducts();
@@ -39,7 +68,7 @@ onMounted(() => {
     <div class="bg-[#050505] min-h-screen pb-20">
         <!-- Header -->
         <div class="pt-12 pb-8 px-6 container mx-auto">
-            <h1 class="font-display text-4xl md:text-6xl font-black text-white mb-4">SHOP ALL</h1>
+            <h1 class="font-display text-4xl md:text-6xl font-black text-white mb-4">{{ selectedCategory === 'All Products' ? 'SHOP ALL' : selectedCategory.toUpperCase() }}</h1>
             <p class="text-gray-400 max-w-xl">Khám phá bộ sưu tập đầy đủ của CoolStyle. Từ Streetwear đến Essentials.</p>
         </div>
 
@@ -55,13 +84,13 @@ onMounted(() => {
                     <div class="mb-8">
                         <h4 class="text-gray-500 text-xs font-bold uppercase mb-4">Category</h4>
                         <ul class="space-y-3">
-                            <li v-for="cat in ['All Products', 'T-Shirts', 'Hoodies', 'Pants', 'Accessories']" :key="cat">
-                                <label class="flex items-center gap-3 cursor-pointer group">
-                                    <div class="w-4 h-4 rounded border border-white/20 flex items-center justify-center group-hover:border-cyan-500 transition">
-                                        <!-- Fake check -->
+                            <li v-for="cat in ['All Products', 'Men', 'Women', 'Accessories']" :key="cat">
+                                <button @click="selectCategory(cat)" class="flex items-center gap-3 cursor-pointer group w-full text-left">
+                                    <div :class="['w-4 h-4 rounded border flex items-center justify-center transition', selectedCategory === cat ? 'bg-cyan-500 border-cyan-500' : 'border-white/20 group-hover:border-cyan-500']">
+                                        <div v-if="selectedCategory === cat" class="w-1.5 h-1.5 bg-black rounded-sm"></div>
                                     </div>
-                                    <span class="text-gray-400 group-hover:text-white transition">{{ cat }}</span>
-                                </label>
+                                    <span :class="['transition', selectedCategory === cat ? 'text-white font-bold' : 'text-gray-400 group-hover:text-white']">{{ cat }}</span>
+                                </button>
                             </li>
                         </ul>
                     </div>
@@ -88,7 +117,7 @@ onMounted(() => {
                         <SlidersHorizontal :size="16" /> Filters
                     </button>
 
-                    <p class="text-gray-400 text-sm hidden md:block">Showing <span class="text-white font-bold">{{ products.length }}</span> products</p>
+                    <p class="text-gray-400 text-sm hidden md:block">Showing <span class="text-white font-bold">{{ filteredProducts.length }}</span> products</p>
 
                     <div class="relative group">
                         <button class="flex items-center gap-2 text-white bg-white/5 border border-white/10 px-4 py-2 rounded-lg hover:border-white/30 transition text-sm">
@@ -109,7 +138,7 @@ onMounted(() => {
                  </div>
 
                  <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-10">
-                     <ProductCard v-for="product in sortedProducts" :key="product.id" :product="product" />
+                     <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product" />
                  </div>
             </div>
         </div>

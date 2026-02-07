@@ -22,7 +22,7 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col font-sans bg-[#050505] text-white selection:bg-cyan-500/30 selection:text-cyan-100">
+  <div class="min-h-screen flex flex-col font-sans text-white selection:bg-cyan-500/30 selection:text-cyan-100">
     <!-- Navbar (Neo-Glass) -->
     <header class="h-20 fixed w-full top-0 z-50 transition-all duration-300 glass">
       <div class="h-full container mx-auto px-6 flex items-center justify-between">
@@ -40,10 +40,10 @@ const handleLogout = () => {
           <!-- Desktop Nav -->
           <nav class="hidden md:flex gap-10 text-sm font-bold uppercase tracking-widest">
             <router-link to="/" class="nav-link">Home</router-link>
-            <a href="#" class="nav-link">Men</a>
-            <a href="#" class="nav-link">Women</a>
-            <a href="#" class="nav-link text-neon">Collections</a>
-            <a href="#" class="text-red-500 hover:text-red-400 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] transition">Sale</a>
+            <router-link to="/shop" class="nav-link">Men</router-link>
+            <router-link to="/shop" class="nav-link">Women</router-link>
+            <router-link to="/shop" class="nav-link text-neon">Collections</router-link>
+            <router-link to="/shop" class="text-red-500 hover:text-red-400 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] transition">Sale</router-link>
           </nav>
           
           <!-- Icons -->
