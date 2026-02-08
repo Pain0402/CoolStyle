@@ -23,10 +23,10 @@ public static class DataSeeder
              return;
         }
 
-        // Only seed if no products exist
-        if (await context.Products.AnyAsync())
+        // Only seed if we have very little data (e.g. failed previous seed)
+        if (await context.Products.CountAsync() > 5)
         {
-            Log.Information("DataSeeder: Database already has data. Skipping.");
+            Log.Information("DataSeeder: Database already has sufficient data. Skipping.");
             return;
         }
 
@@ -47,7 +47,13 @@ public static class DataSeeder
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "DataSeeder: Failed to seed from primary sources. Falling back to local data.");
+            Log.Error(ex, "DataSeeder: Failed to seed from primary sources.");
+        }
+
+        // FINAL CHECK: If database is still empty (API failed or returned 0 items), force local data
+        if (!await context.Products.AnyAsync())
+        {
+            Log.Warning("DataSeeder: Database is still empty. Forcing Local Fallback Data.");
             await SeedLocalDataAsync(context);
         }
     }
@@ -72,14 +78,19 @@ public static class DataSeeder
             await context.SaveChangesAsync();
         }
 
-        var productsToSeed = scrapedProducts.Select(p => new Product
-        {
-            Name = p.Name,
-            Slug = p.Slug + "-" + Guid.NewGuid().ToString().Substring(0, 4),
-            Description = $"Sản phẩm chất lượng từ bộ sưu tập Coolmate. {p.Name} được thiết kế tối giản, hiện đại.",
-            BasePrice = p.BasePrice,
-            CategoryId = coolmateCat.Id,
-            Images = new List<ProductImage> { new() { Url = p.ImageUrl, IsPrimary = true, DisplayOrder = 1 } }
+        var random = new Random();
+        var productsToSeed = scrapedProducts.Select(p => {
+             var product = new Product
+             {
+                 Name = p.Name,
+                 Slug = p.Slug + "-" + Guid.NewGuid().ToString().Substring(0, 4),
+                 Description = $"Sản phẩm chất lượng từ bộ sưu tập Coolmate. {p.Name} được thiết kế tối giản, hiện đại.",
+                 BasePrice = p.BasePrice,
+                 CategoryId = coolmateCat.Id,
+                 Images = new List<ProductImage> { new() { Url = p.ImageUrl, IsPrimary = true, DisplayOrder = 1 } }
+             };
+             product.Variants = GenerateMockVariants(product, random);
+             return product;
         }).ToList();
 
         context.Products.AddRange(productsToSeed);
@@ -134,6 +145,8 @@ public static class DataSeeder
 
         // 2. Process Products
         var productsToSeed = new List<Product>();
+        var random = new Random();
+
         foreach (var extProd in externalProducts)
         {
             // Convert Price to VND-ish (multiply by 25k) or keep if it's already large
@@ -153,6 +166,10 @@ public static class DataSeeder
                     DisplayOrder = index + 1
                 }).ToList()
             };
+
+            // Add Variants
+            product.Variants = GenerateMockVariants(product, random);
+            
             productsToSeed.Add(product);
         }
 
@@ -161,15 +178,40 @@ public static class DataSeeder
         Log.Information($"DataSeeder: Successfully seeded {productsToSeed.Count} products from External API.");
     }
 
-    private static async Task SeedLocalDataAsync(ApplicationDbContext context)
+    private static ICollection<ProductVariant> GenerateMockVariants(Product product, Random random)
     {
-        // ... (Keep existing local seeding logic as fallback)
-        // For brevity, I'll implement a simplified version or just use the one we had
-        Log.Information("DataSeeder: Seeding local fallback data...");
-        // (Implementation omitted for now, we can include the full one if needed)
+        var variants = new List<ProductVariant>();
+        var sizes = new[] { "S", "M", "L", "XL" };
+        var colors = new[] 
+        { 
+            new { Name = "Black", Hex = "#000000" }, 
+            new { Name = "White", Hex = "#FFFFFF" },
+            new { Name = "Navy", Hex = "#000080" }
+        };
+
+        // Pick 2 random colors for this product
+        var selectedColors = colors.OrderBy(x => random.Next()).Take(2).ToList();
+
+        foreach (var color in selectedColors)
+        {
+            foreach (var size in sizes)
+            {
+                variants.Add(new ProductVariant
+                {
+                    ColorName = color.Name,
+                    ColorHex = color.Hex,
+                    Size = size,
+                    Sku = $"{product.Slug.ToUpper()}-{color.Name.Substring(0, 1)}-{size}",
+                    PriceModifier = size == "XL" ? 10000 : 0, // XL +10k
+                    StockQuantity = random.Next(0, 50)
+                });
+            }
+        }
+        return variants;
     }
 
-    // DTOs for External API
+
+    // DTOs for External API (Needed for compilation)
     public class ExternalProduct
     {
         public int Id { get; set; }
@@ -187,26 +229,50 @@ public static class DataSeeder
         public string Image { get; set; } = string.Empty;
     }
 
-    private static Product CreateProduct(int categoryId, string name, string slug, decimal price, string description, string img1, string? img2 = null)
+    private static async Task SeedLocalDataAsync(ApplicationDbContext context)
     {
-        var images = new List<ProductImage>
+        Log.Information("DataSeeder: Seeding local fallback data...");
+        
+        // Ensure Category
+        var cat = await context.Categories.FirstOrDefaultAsync(c => c.Slug == "ao-thun");
+        if (cat == null)
         {
-            new() { Url = img1, IsPrimary = true, DisplayOrder = 1 }
-        };
-
-        if (img2 != null)
-        {
-            images.Add(new() { Url = img2, IsPrimary = false, DisplayOrder = 2 });
+            cat = new Category { Name = "Áo Thun Premium", Slug = "ao-thun" };
+            context.Categories.Add(cat);
+            await context.SaveChangesAsync();
         }
 
-        return new Product
+        var products = new List<Product>();
+        var random = new Random();
+
+        for (int i = 1; i <= 10; i++)
         {
-            Name = name,
-            Slug = slug,
-            Description = $"<p>{description}</p>",
-            BasePrice = price,
-            CategoryId = categoryId,
-            Images = images
-        };
+            var p = new Product
+            {
+                Name = $"Áo Thun CoolStyle Basic {i}",
+                Slug = $"ao-thun-basic-{i}",
+                Description = "Chất liệu cotton 100% cao cấp, thoáng mát, thấm hút mồ hôi tốt. Thiết kế form regular fit phù hợp mọi dáng người.",
+                BasePrice = 250000 + (i * 10000), // 260k, 270k...
+                CategoryId = cat.Id,
+                Images = new List<ProductImage>
+                {
+                    new() { Url = $"https://plus.unsplash.com/premium_photo-1673327092106-96b42b9415c4?q=80&w=600&auto=format&fit=crop", IsPrimary = true, DisplayOrder = 1 },
+                    new() { Url = $"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop", IsPrimary = false, DisplayOrder = 2 }
+                }
+            };
+            
+            p.Variants = GenerateMockVariants(p, random);
+            products.Add(p);
+        }
+
+        context.Products.AddRange(products);
+        await context.SaveChangesAsync();
+        Log.Information($"DataSeeder: Successfully seeded {products.Count} fallback products.");
+    }
+
+    private static Product CreateProduct(int categoryId, string name, string slug, decimal price, string description, string img1, string? img2 = null)
+    {
+        // This helper is unused now but kept for compatibility or removed
+        return new Product(); 
     }
 }

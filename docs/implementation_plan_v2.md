@@ -10,9 +10,9 @@
   - [x] Định nghĩa lại `style.css`: Bảng màu Premium hơn, Glassmorphism cấp độ 2.
 - [x] **6.2. Page Expansion**:
   - [x] **Landing Page**: Thiết kế lại Home với Hero Banner 3D, Featured Categories.
-- [ ] **6.3. Advanced Effects Integration**:
-  - [ ] Thêm hiệu ứng Tilt (nghiêng 3D) cho Product Card khi hover.
-  - [x] Page Transition: Hiệu ứng chuyển trang mượt mà (Fade).
+- [x] **6.3. Advanced Effects Integration**:
+  - [x] Thêm hiệu ứng Tilt/Hover 3D cho Product Card (CSS 3D Transforms).
+  - [x] Page Transition: Hiệu ứng chuyển trang mượt mà (Fade/Slide).
 
 ## Phase 7: Data Richness (Content Strategy) (Completed)
 **Mục tiêu:** Thay máu toàn bộ dữ liệu mẫu bằng dữ liệu "thật".
@@ -25,9 +25,9 @@
 
 ## Phase 8: Advanced Product Logic (Backend Heavy) (Next Up)
 **Mục tiêu:** Xử lý các logic phức tạp của thương mại điện tử.
-- [ ] **8.1. Variant System (Size/Color)**:
-  - [ ] Cập nhật DB Schema: `Product` -> `ProductVariant` (Mỗi size/màu là 1 dòng riêng có tồn kho riêng).
-  - [ ] Cập nhật API `GetProductDetail` để trả về các biến thể.
+- [x] **8.1. Variant System (Size/Color)**:
+  - [x] Cập nhật DB Schema: `Product` -> `ProductVariant` (Mỗi size/màu là 1 dòng riêng có tồn kho riêng).
+  - [x] Cập nhật API `GetProductDetail` để trả về các biến thể.
 - [ ] **8.2. Categories API**:
   - [ ] Tạo `CategoriesController` để trả về danh mục động cho Frontend Menu.
 - [ ] **8.3. User Features**:

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
@@ -17,43 +17,116 @@ const loading = ref(true);
 const quantity = ref(1);
 const activeImage = ref(0);
 
+// Variant State
+const selectedColor = ref<string>('');
+const selectedSize = ref<string>('');
+
 // Mock images (since backend usually sends one)
 const images = ref<string[]>([]);
 const relatedProducts = ref<any[]>([]);
 
+// Computed Variants Logic
+const uniqueColors = computed(() => {
+    if (!product.value?.variants) return [];
+    const colors = new Map();
+    product.value.variants.forEach((v: any) => {
+        if (!colors.has(v.colorName)) {
+            colors.set(v.colorName, { name: v.colorName, hex: v.colorHex });
+        }
+    });
+    return Array.from(colors.values());
+});
+
+const availableSizes = computed(() => {
+    if (!product.value?.variants || !selectedColor.value) return [];
+    return product.value.variants
+        .filter((v: any) => v.colorName === selectedColor.value)
+        .map((v: any) => v.size)
+        // Sort sizes: S, M, L, XL...
+        .sort((a: string, b: string) => {
+            const order = ['S', 'M', 'L', 'XL', '2XL'];
+            return order.indexOf(a) - order.indexOf(b);
+        });
+});
+
+const selectColor = (color: string) => {
+    selectedColor.value = color;
+    // Auto-select first available size for this color if current size invalid
+    const sizes = product.value.variants.filter((v: any) => v.colorName === color).map((v: any) => v.size);
+    if (!sizes.includes(selectedSize.value)) {
+        selectedSize.value = sizes[0] || '';
+    }
+};
+
+// Update price based on variant (if needed)
+const currentPrice = computed(() => {
+    if (!product.value) return 0;
+    const variant = product.value.variants?.find((v: any) => 
+        v.colorName === selectedColor.value && v.size === selectedSize.value
+    );
+    return variant ? variant.price : product.value.basePrice;
+});
+
 const fetchProduct = async () => {
     try {
-        // In real app, fetch by slug. For now we might need to search or fetch logic.
-        // Assuming API supports /products/:id or we fetch all and find (temporary demo).
-        // Let's assume we pass ID via state or fetch list.
-        // Quick hack: Fetch all and find by slug (Not performant but works for demo)
-        const response: any = await apiClient.get('/products');
-        const found = (response as any[]).find(p => p.slug === route.params.slug);
+        loading.value = true;
         
-        if (found) {
-            product.value = found;
+        // Correct API Call: Get Single Product with Variants
+        const response: any = await apiClient.get(`/products/${route.params.slug}`);
+        
+        if (response) {
+            product.value = response;
+            
+            // Setup Images
             images.value = [
-                found.thumbnailUrl || 'https://placehold.co/600x800',
-                // Add dupes for gallery demo
-                found.thumbnailUrl,
-                found.thumbnailUrl
+                response.thumbnailUrl || 'https://placehold.co/600x800',
+                ...(response.images?.map((img: any) => img.url) || [])
             ];
             
-            // Mock related products (exclude current)
-            relatedProducts.value = (response as any[])
-                .filter(p => p.id !== found.id)
-                .slice(0, 4);
+            // Remove duplicates and ensure at least one image
+            images.value = [...new Set(images.value)];
+            if (images.value.length === 0) images.value = ['https://placehold.co/600x800'];
+
+            // Set Default Variant
+            if (response.variants && response.variants.length > 0) {
+                const firstVar = response.variants[0];
+                selectedColor.value = firstVar.colorName;
+                selectedSize.value = firstVar.size;
+            }
+
+            // Fetch related products separately if needed or mock for now
+            // For now, mocking related to keep it simple, or call list API
+            relatedProducts.value = []; 
+            fetchRelated(response.categoryName);
         }
     } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch product detail:", err);
+        product.value = null;
     } finally {
         loading.value = false;
     }
 };
 
+const fetchRelated = async (_category: string) => {
+    try {
+       // Fetch a few products for related section
+       // Can optimize later with category ID
+       const res: any = await apiClient.get('/products');
+       if (Array.isArray(res)) {
+           relatedProducts.value = res.filter((p: any) => p.slug !== route.params.slug).slice(0, 4);
+       }
+    } catch (e) { console.error(e); }
+};
+
 const addToCart = () => {
     if (!product.value) return;
-    cartStore.addToCart(product.value); // TODO: Handle quantity in store
+
+    // Find full variant object
+    const variant = product.value.variants?.find((v: any) => 
+        v.colorName === selectedColor.value && v.size === selectedSize.value
+    );
+
+    cartStore.addToCart(product.value, quantity.value, variant);
     toast.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ!`);
 };
 
@@ -116,7 +189,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
                 
                 <div class="flex items-center gap-4 mb-8">
                     <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-                        {{ formatCurrency(product.basePrice) }}
+                        {{ formatCurrency(currentPrice) }}
                     </div>
                     <div class="flex items-center gap-1 text-yellow-400 text-sm bg-yellow-400/10 px-2 py-1 rounded">
                          <Star :size="14" fill="currentColor" /> 4.8 (120 reviews)
@@ -126,17 +199,42 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
                 <!-- Divider -->
                 <div class="h-px bg-white/10 my-8"></div>
 
-                <!-- Size Selector (Mock) -->
-                <div class="mb-8">
-                    <div class="flex justify-between mb-3">
-                        <span class="font-bold text-sm text-gray-300">Select Size</span>
-                        <a href="#" class="text-xs text-cyan-400 underline">Size Chart</a>
+                <!-- Variant Selector -->
+                <div v-if="product.variants && product.variants.length > 0" class="mb-8 space-y-6">
+                    
+                    <!-- Color Selection -->
+                    <div>
+                        <span class="block font-bold text-sm text-gray-300 mb-3">Màu sắc: <span class="text-cyan-400">{{ selectedColor }}</span></span>
+                        <div class="flex flex-wrap gap-3">
+                            <button v-for="color in uniqueColors" :key="color.name" 
+                                    @click="selectColor(color.name)"
+                                    :class="['w-10 h-10 rounded-full border-2 flex items-center justify-center transition', selectedColor === color.name ? 'border-cyan-400 scale-110' : 'border-transparent hover:scale-105 ring-1 ring-white/10']"
+                                    :style="{ backgroundColor: color.hex }"
+                                    :title="color.name">
+                                <span v-if="selectedColor === color.name" class="block w-2 h-2 bg-white rounded-full shadow-md"></span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex gap-3">
-                        <button v-for="size in ['S', 'M', 'L', 'XL']" :key="size" class="w-12 h-12 rounded-lg border border-white/20 hover:border-cyan-500 hover:bg-cyan-500/10 flex items-center justify-center font-bold transition">
-                            {{ size }}
-                        </button>
+
+                    <!-- Size Selection -->
+                    <div>
+                        <div class="flex justify-between mb-3">
+                            <span class="font-bold text-sm text-gray-300">Kích thước: <span class="text-cyan-400">{{ selectedSize }}</span></span>
+                            <a href="#" class="text-xs text-cyan-400 underline hover:text-white transition">Hướng dẫn chọn size</a>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button v-for="size in availableSizes" :key="size" 
+                                    @click="selectedSize = size"
+                                    :class="['min-w-[3rem] h-12 px-4 rounded-xl border font-bold transition flex items-center justify-center', 
+                                             selectedSize === size ? 'border-cyan-400 bg-cyan-400/10 text-cyan-400 shadow-[0_0_10px_rgba(0,242,234,0.3)]' : 'border-white/10 bg-white/5 hover:border-white/30 text-gray-300']">
+                                {{ size }}
+                            </button>
+                        </div>
                     </div>
+                </div>
+
+                <div v-else class="mb-8 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-200 text-sm">
+                    Sản phẩm này hiện đang hết hàng hoặc chưa có biến thể.
                 </div>
 
                 <!-- Actions -->
@@ -149,7 +247,7 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
                     </div>
                     
                     <button @click="addToCart" class="btn-primary w-full flex-1 text-center bg-[#00f2ea] text-black hover:bg-[#00c2bb]">
-                        Add to Cart - {{ formatCurrency(product.basePrice * quantity) }}
+                        Add to Cart - {{ formatCurrency(currentPrice * quantity) }}
                     </button>
                 </div>
 

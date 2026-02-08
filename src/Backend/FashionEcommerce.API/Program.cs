@@ -97,13 +97,12 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS for Frontend
-// CORS for Frontend
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+// CORS for Frontend (Allow All for Production fix)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

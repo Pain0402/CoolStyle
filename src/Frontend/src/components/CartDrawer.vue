@@ -47,7 +47,7 @@ const handleCheckoutSuccess = () => {
             </div>
 
             <div v-else class="space-y-6">
-                <div v-for="item in cartStore.items" :key="item.productId" class="flex gap-4">
+                <div v-for="item in cartStore.items" :key="item.id" class="flex gap-4">
                     <!-- Image -->
                     <div class="h-24 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5">
                         <img :src="item.thumbnailUrl || 'https://placehold.co/100'" :alt="item.name" class="h-full w-full object-cover object-center" />
@@ -64,12 +64,12 @@ const handleCheckoutSuccess = () => {
                         </div>
                         <div class="flex flex-1 items-end justify-between text-sm">
                             <div class="flex items-center border border-white/10 rounded-lg bg-white/5">
-                                <button @click="cartStore.updateQuantity(item.productId, item.quantity - 1)" class="p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition"><Minus :size="14"/></button>
+                                <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition"><Minus :size="14"/></button>
                                 <span class="px-3 font-medium text-white">{{ item.quantity }}</span>
-                                <button @click="cartStore.updateQuantity(item.productId, item.quantity + 1)" class="p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition"><Plus :size="14"/></button>
+                                <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition"><Plus :size="14"/></button>
                             </div>
 
-                            <button @click="cartStore.removeFromCart(item.productId)" class="font-medium text-red-400 hover:text-red-300 flex items-center gap-1 transition">
+                            <button @click="cartStore.removeFromCart(item.id)" class="font-medium text-red-400 hover:text-red-300 flex items-center gap-1 transition">
                                 <Trash2 :size="16" />
                             </button>
                         </div>
