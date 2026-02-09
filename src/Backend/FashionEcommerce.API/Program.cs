@@ -55,6 +55,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 // 4. API Services
 builder.Services.AddControllers();

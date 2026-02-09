@@ -28,8 +28,8 @@
 - [x] **8.1. Variant System (Size/Color)**:
   - [x] Cập nhật DB Schema: `Product` -> `ProductVariant` (Mỗi size/màu là 1 dòng riêng có tồn kho riêng).
   - [x] Cập nhật API `GetProductDetail` để trả về các biến thể.
-- [ ] **8.2. Categories API**:
-  - [ ] Tạo `CategoriesController` để trả về danh mục động cho Frontend Menu.
+- [x] **8.2. Categories API**:
+  - [x] Tạo `CategoriesController` để trả về danh mục động cho Frontend Menu.
 - [ ] **8.3. User Features**:
   - [ ] Trang Profile (Hồ sơ cá nhân).
   - [ ] Quản lý Sổ địa chỉ (Address Book).

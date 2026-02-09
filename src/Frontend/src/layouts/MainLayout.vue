@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { ShoppingBag, Search, Menu, User, LogOut, Instagram, Facebook, Twitter, ArrowRight } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/auth';
 import { useCartStore } from '../stores/cart';
 import { useToast } from 'vue-toastification';
+import apiClient from '../utils/api';
 import AuthModal from '../components/AuthModal.vue';
 import CartDrawer from '../components/CartDrawer.vue';
 
@@ -13,6 +14,20 @@ const toast = useToast();
 const showAuthModal = ref(false);
 const showCartDrawer = ref(false);
 const showUserMenu = ref(false);
+const categories = ref<any[]>([]);
+
+const fetchCategories = async () => {
+    try {
+        const res: any = await apiClient.get('/categories');
+        if (res) categories.value = res;
+    } catch (e) {
+        console.error("Failed to fetch menu categories", e);
+    }
+}
+
+onMounted(() => {
+    fetchCategories();
+});
 
 const handleLogout = () => {
   authStore.logout();
@@ -40,8 +55,18 @@ const handleLogout = () => {
           <!-- Desktop Nav -->
           <nav class="hidden md:flex gap-10 text-sm font-bold uppercase tracking-widest">
             <router-link to="/" class="nav-link">Home</router-link>
-            <router-link to="/shop" class="nav-link">Men</router-link>
-            <router-link to="/shop" class="nav-link">Women</router-link>
+            
+            <!-- Dynamic Categories -->
+            <router-link v-for="cat in categories" :key="cat.id" :to="`/shop?category=${cat.slug}`" class="nav-link">
+                {{ cat.name }}
+            </router-link>
+
+            <!-- Fallback if no categories -->
+            <template v-if="categories.length === 0">
+                <router-link to="/shop?gender=men" class="nav-link">Men</router-link>
+                <router-link to="/shop?gender=women" class="nav-link">Women</router-link>
+            </template>
+
             <router-link to="/shop" class="nav-link text-neon">Collections</router-link>
             <router-link to="/shop" class="text-red-500 hover:text-red-400 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] transition">Sale</router-link>
           </nav>
