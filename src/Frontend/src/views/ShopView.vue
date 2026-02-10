@@ -14,6 +14,8 @@ const sortBy = ref('newest');
 const selectedCategory = ref('All Products');
 const showMobileFilters = ref(false);
 
+const searchQuery = ref('');
+
 const fetchProducts = async () => {
     try {
         const response: any = await apiClient.get('/products');
@@ -30,10 +32,18 @@ const filteredProducts = computed(() => {
 
     // Filter by Category
     if (selectedCategory.value && selectedCategory.value !== 'All Products') {
-        // Simple case-insensitive match for demo
         p = p.filter(prod => 
             prod.categoryName?.toLowerCase().includes(selectedCategory.value.toLowerCase()) || 
             prod.name.toLowerCase().includes(selectedCategory.value.toLowerCase())
+        );
+    }
+
+    // Filter by Search Query
+    if (searchQuery.value) {
+        p = p.filter(prod => 
+            prod.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            prod.description?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+            prod.categoryName?.toLowerCase().includes(searchQuery.value.toLowerCase())
         );
     }
 
@@ -46,8 +56,9 @@ const filteredProducts = computed(() => {
 
 const selectCategory = (cat: string) => {
     selectedCategory.value = cat;
-    // Update URL without reload
-    router.push({ query: { ...route.query, category: cat === 'All Products' ? undefined : cat } });
+    // Clear search when category changes for cleaner experience
+    searchQuery.value = '';
+    router.push({ query: { category: cat === 'All Products' ? undefined : cat } });
 };
 
 watch(() => route.query.category, (newCat) => {
@@ -56,6 +67,10 @@ watch(() => route.query.category, (newCat) => {
     } else {
         selectedCategory.value = 'All Products';
     }
+}, { immediate: true });
+
+watch(() => route.query.search, (newSearch) => {
+    searchQuery.value = (newSearch as string) || '';
 }, { immediate: true });
 
 onMounted(() => {
@@ -68,8 +83,14 @@ onMounted(() => {
     <div class="bg-[#050505] min-h-screen pb-20">
         <!-- Header -->
         <div class="pt-12 pb-8 px-6 container mx-auto">
-            <h1 class="font-display text-4xl md:text-6xl font-black text-white mb-4">{{ selectedCategory === 'All Products' ? 'SHOP ALL' : selectedCategory.toUpperCase() }}</h1>
-            <p class="text-gray-400 max-w-xl">Khám phá bộ sưu tập đầy đủ của CoolStyle. Từ Streetwear đến Essentials.</p>
+            <h1 class="font-display text-4xl md:text-6xl font-black text-white mb-4 uppercase">
+                <template v-if="searchQuery">SEARCH: {{ searchQuery }}</template>
+                <template v-else>{{ selectedCategory === 'All Products' ? 'SHOP ALL' : selectedCategory }}</template>
+            </h1>
+            <p class="text-gray-400 max-w-xl">
+                <template v-if="searchQuery">Showing {{ filteredProducts.length }} results for your search.</template>
+                <template v-else>Khám phá bộ sưu tập đầy đủ của CoolStyle. Từ Streetwear đến Essentials.</template>
+            </p>
         </div>
 
         <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10">

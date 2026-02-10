@@ -50,15 +50,28 @@ watch(searchQuery, () => {
     searchTimeout = setTimeout(fetchSuggestions, 300);
 });
 
-const closeSearch = () => {
+const goToProduct = (slug: string) => {
+    router.push(`/product/${slug}`);
     showSearch.value = false;
     searchQuery.value = '';
     searchResults.value = [];
 };
 
-const goToProduct = (slug: string) => {
-    router.push(`/product/${slug}`);
-    closeSearch();
+const handleSearchEnter = () => {
+    if (searchQuery.value.trim()) {
+        router.push(`/shop?search=${encodeURIComponent(searchQuery.value.trim())}`);
+        showSearch.value = false;
+        searchQuery.value = '';
+        searchResults.value = [];
+    }
+};
+
+const toggleSearch = () => {
+    showSearch.value = !showSearch.value;
+    if (!showSearch.value) {
+        searchQuery.value = '';
+        searchResults.value = [];
+    }
 };
 
 const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
@@ -129,66 +142,46 @@ const handleLogout = () => {
           
           <!-- Icons -->
           <div class="flex gap-6 items-center">
-            <button @click="showSearch = true" class="icon-btn focus:outline-none"><Search :size="20" stroke-width="2.5" /></button>
             
-            <!-- Professional Search Overlay -->
-            <div v-if="showSearch" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl animate-fade-in flex flex-col pt-32 px-6">
-                <button @click="closeSearch" class="absolute top-8 right-8 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition">
-                    <X :size="24" />
-                </button>
-
-                <div class="max-w-3xl mx-auto w-full">
-                    <div class="relative group">
-                        <Search class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 transition" :size="24" />
-                        <input 
-                            v-model="searchQuery"
-                            v-focus
-                            type="text" 
-                            placeholder="Type to find your style..."
-                            class="w-full bg-white/5 border-b-2 border-white/10 px-16 py-6 text-2xl font-display focus:outline-none focus:border-cyan-500 transition placeholder-gray-600 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-                            @keyup.esc="closeSearch"
-                        >
-                        <Loader2 v-if="isSearching" class="absolute right-6 top-1/2 -translate-y-1/2 text-cyan-400 animate-spin" :size="24" />
-                    </div>
-
-                    <!-- Results -->
-                    <div class="mt-8 max-h-[60vh] overflow-y-auto space-y-4 custom-scrollbar">
-                        <div v-if="searchQuery.length >= 2 && searchResults.length === 0 && !isSearching" class="text-center py-20 text-gray-500">
-                             No results found for "<span class="text-white">{{ searchQuery }}</span>"
-                        </div>
-
-                        <div 
-                            v-for="product in searchResults" 
-                            :key="product.id"
-                            @click="goToProduct(product.slug)"
-                            class="flex items-center gap-6 p-4 rounded-2xl bg-white/5 border border-transparent hover:border-cyan-500/30 hover:bg-white/10 transition cursor-pointer group"
-                        >
-                            <div class="w-16 h-20 rounded-lg overflow-hidden bg-black flex-shrink-0">
-                                <img :src="product.thumbnailUrl" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="Result">
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-lg group-hover:text-cyan-400 transition">{{ product.name }}</h4>
-                                <p class="text-xs text-cyan-500 uppercase tracking-widest">{{ product.categoryName }}</p>
-                            </div>
-                            <div class="text-xl font-black text-white">
-                                {{ formatCurrency(product.basePrice) }}
-                            </div>
-                            <ArrowRight :size="18" class="text-gray-600 group-hover:text-cyan-400 transform translate-x-[-10px] group-hover:translate-x-0 opacity-0 group-hover:opacity-100 transition-all" />
-                        </div>
-                    </div>
-
-                    <!-- Popular Searches / Categories (Optional/Beauty) -->
-                    <div v-if="searchQuery.length < 2" class="mt-12 animate-fade-in-up">
-                        <h5 class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-6">Popular Categories</h5>
-                        <div class="flex flex-wrap gap-4">
-                            <button v-for="cat in categories.slice(0, 5)" :key="cat.id" 
-                                    @click="searchQuery = cat.name"
-                                    class="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:text-cyan-400 transition text-sm">
-                                {{ cat.name }}
-                            </button>
-                        </div>
-                    </div>
+            <!-- Inline Expanding Search Bar -->
+            <div class="relative flex items-center">
+                <div :class="['flex items-center bg-white/5 border border-white/10 rounded-full transition-all duration-500 ease-in-out px-3 overflow-hidden', 
+                              showSearch ? 'w-[250px] h-10 border-cyan-500/50 bg-white/10 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'w-10 h-10 border-transparent cursor-pointer hover:bg-white/10']"
+                     @click="!showSearch && toggleSearch()">
+                    <Search :size="18" :class="['transition-colors duration-300 flex-shrink-0', showSearch ? 'text-cyan-400' : 'text-gray-400']" />
+                    <input 
+                        v-if="showSearch"
+                        v-model="searchQuery"
+                        v-focus
+                        type="text" 
+                        placeholder="Search..."
+                        class="bg-transparent border-none outline-none text-sm ml-3 w-full text-white placeholder-gray-500"
+                        @keyup.enter="handleSearchEnter"
+                        @blur="!searchQuery && (showSearch = false)"
+                        @keyup.esc="showSearch = false"
+                    >
+                    <Loader2 v-if="isSearching && showSearch" class="ml-2 text-cyan-400 animate-spin flex-shrink-0" :size="14" />
+                    <button v-if="showSearch && searchQuery" @click.stop="searchQuery = ''" class="ml-2 text-gray-500 hover:text-white flex-shrink-0">
+                        <X :size="14" />
+                    </button>
                 </div>
+
+                <!-- Inline Suggestions Dropdown -->
+                <transition name="fade">
+                    <div v-if="showSearch && searchResults.length > 0" 
+                         class="absolute top-12 left-0 right-0 glass border border-white/10 rounded-2xl py-3 z-[60] shadow-2xl max-h-[400px] overflow-y-auto custom-scrollbar animate-fade-in-up">
+                        <div v-for="product in searchResults" :key="product.id"
+                             @click="goToProduct(product.slug)"
+                             class="px-4 py-3 hover:bg-white/5 flex items-center gap-4 cursor-pointer group transition">
+                            <img :src="product.thumbnailUrl" class="w-10 h-12 object-cover rounded-md border border-white/10" />
+                            <div class="flex-1 min-w-0">
+                                <h5 class="text-sm font-bold truncate group-hover:text-cyan-400 transition">{{ product.name }}</h5>
+                                <p class="text-[10px] text-cyan-500/70 uppercase tracking-widest">{{ product.categoryName }}</p>
+                            </div>
+                            <div class="text-xs font-black">{{ formatCurrency(product.basePrice) }}</div>
+                        </div>
+                    </div>
+                </transition>
             </div>
             
             <!-- Wishlist Link -->
@@ -352,11 +345,19 @@ const handleLogout = () => {
 }
 
 @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in-up {
-    animation: fade-in-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes staggered-in {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-staggered-in {
+    animation: staggered-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes fade-in {
@@ -364,7 +365,23 @@ const handleLogout = () => {
     to { opacity: 1; }
 }
 .animate-fade-in {
-    animation: fade-in 0.3s ease-out;
+    animation: fade-in 0.4s ease-out both;
+}
+
+/* Vue Transitions */
+.search-overlay-enter-active, .search-overlay-leave-active {
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.search-overlay-enter-from, .search-overlay-leave-to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -374,10 +391,17 @@ const handleLogout = () => {
     background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(34, 211, 238, 0.3);
+    background: rgba(34, 211, 238, 0.2);
+}
+
+/* Glass Utility */
+.glass {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 </style>
