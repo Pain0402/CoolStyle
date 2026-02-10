@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useWishlistStore } from '../stores/wishlist';
 import { useToast } from 'vue-toastification';
 import { X } from 'lucide-vue-next';
 
 const emit = defineEmits(['close']);
 const authStore = useAuthStore();
+const wishlistStore = useWishlistStore();
 const toast = useToast();
 
 const isLogin = ref(true);
@@ -28,6 +30,10 @@ const handleSubmit = async () => {
             await authStore.register(formData.value);
             toast.success("Đăng ký tài khoản thành công! 🚀");
         }
+        
+        // Fetch wishlist data after login
+        await wishlistStore.fetchWishlist();
+        
         emit('close');
     } catch (err: any) {
         const errorMsg = err.response?.data?.message || err.message || 'Có lỗi xảy ra.';

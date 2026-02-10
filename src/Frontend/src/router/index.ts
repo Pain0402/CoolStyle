@@ -4,7 +4,7 @@ import AdminDashboard from '../views/AdminDashboard.vue';
 import ShopView from '../views/ShopView.vue';
 import ProductDetailView from '../views/ProductDetailView.vue';
 import LoginView from '../views/LoginView.vue';
-import ProfileView from '../views/ProfileView.vue';
+import UserProfileView from '../views/UserProfileView.vue';
 import { useAuthStore } from '../stores/auth';
 
 const router = createRouter({
@@ -33,7 +33,7 @@ const router = createRouter({
         {
             path: '/profile',
             name: 'profile',
-            component: ProfileView,
+            component: UserProfileView,
             meta: { requiresAuth: true }
         },
         {

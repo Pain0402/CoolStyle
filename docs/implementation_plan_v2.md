@@ -30,10 +30,10 @@
   - [x] Cập nhật API `GetProductDetail` để trả về các biến thể.
 - [x] **8.2. Categories API**:
   - [x] Tạo `CategoriesController` để trả về danh mục động cho Frontend Menu.
-- [ ] **8.3. User Features**:
-  - [ ] Trang Profile (Hồ sơ cá nhân).
-  - [ ] Quản lý Sổ địa chỉ (Address Book).
-  - [ ] Wishlist (Sản phẩm yêu thích).
+- [x] **8.3. User Features**:
+  - [x] Trang Profile (Hồ sơ cá nhân).
+  - [x] Quản lý Sổ địa chỉ (Address Book).
+  - [x] Wishlist (Sản phẩm yêu thích).
 
 ## Phase 9: Real Transactions (Operations)
 **Mục tiêu:** Tiền thật, Đơn hàng thật.

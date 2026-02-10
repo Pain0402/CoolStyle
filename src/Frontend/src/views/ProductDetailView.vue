@@ -5,11 +5,15 @@ import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
 import apiClient from '../utils/api';
 import { useCartStore } from '../stores/cart';
+import { useWishlistStore } from '../stores/wishlist';
+import { useAuthStore } from '../stores/auth';
 import { useToast } from 'vue-toastification';
-import { Star, Truck, ShieldCheck, Heart, Share2, Plus, Minus } from 'lucide-vue-next';
+import { Star, Truck, ShieldCheck, Heart, Share2, Plus, Minus, ShoppingBag } from 'lucide-vue-next';
 
 const route = useRoute();
 const cartStore = useCartStore();
+const wishlistStore = useWishlistStore();
+const authStore = useAuthStore();
 const toast = useToast();
 
 const product = ref<any>(null);
@@ -107,6 +111,8 @@ const fetchProduct = async () => {
     }
 };
 
+const isWishlisted = computed(() => product.value ? wishlistStore.isInWishlist(product.value.id) : false);
+
 const fetchRelated = async (_category: string) => {
     try {
        // Fetch a few products for related section
@@ -128,6 +134,22 @@ const addToCart = () => {
 
     cartStore.addToCart(product.value, quantity.value, variant);
     toast.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ!`);
+};
+
+const addToWishlist = async () => {
+    if (!product.value) return;
+    
+    const added = await wishlistStore.toggleWishlist(product.value);
+    if (!authStore.isAuthenticated) {
+        toast.error("Vui lòng đăng nhập để sử dụng tính năng này!");
+        return;
+    }
+    
+    if (added) {
+        toast.success("Đã thêm vào danh sách yêu thích!");
+    } else {
+        toast.info("Đã xóa khỏi danh sách yêu thích");
+    }
 };
 
 onMounted(() => {
@@ -237,19 +259,25 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
                     Sản phẩm này hiện đang hết hàng hoặc chưa có biến thể.
                 </div>
 
-                <!-- Actions -->
-                <div class="flex gap-6 mb-8">
-                    <!-- Qty -->
-                    <div class="flex items-center bg-white/5 rounded-xl border border-white/10">
-                        <button @click="quantity > 1 ? quantity-- : null" class="w-12 h-12 flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white"><Minus :size="16"/></button>
-                        <span class="w-8 text-center font-bold">{{ quantity }}</span>
-                        <button @click="quantity++" class="w-12 h-12 flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white"><Plus :size="16"/></button>
+                    <div class="flex gap-4 mb-8">
+                        <!-- Qty -->
+                        <div class="flex items-center bg-white/5 rounded-xl border border-white/10 h-14">
+                            <button @click="quantity > 1 ? quantity-- : null" class="w-12 h-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white"><Minus :size="16"/></button>
+                            <span class="w-8 text-center font-bold">{{ quantity }}</span>
+                            <button @click="quantity++" class="w-12 h-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white"><Plus :size="16"/></button>
+                        </div>
+                        
+                        <button @click="addToCart" class="flex-1 h-14 bg-[#00f2ea] text-black font-bold rounded-xl hover:bg-[#00c2bb] shadow-[0_0_20px_rgba(0,242,234,0.3)] transition-all flex items-center justify-center gap-2">
+                            <ShoppingBag :size="20" />
+                            <span>Add to Cart - {{ formatCurrency(currentPrice * quantity) }}</span>
+                        </button>
+
+                        <button @click="addToWishlist" 
+                                :class="['w-14 h-14 rounded-xl border flex items-center justify-center transition-all group', 
+                                         isWishlisted ? 'border-red-500 bg-red-500/10 text-red-500' : 'border-white/10 text-white hover:border-red-500 hover:text-red-500 hover:bg-red-500/10']">
+                            <Heart :size="24" :fill="isWishlisted ? 'currentColor' : 'none'" class="group-active:scale-90 transition-transform" />
+                        </button>
                     </div>
-                    
-                    <button @click="addToCart" class="btn-primary w-full flex-1 text-center bg-[#00f2ea] text-black hover:bg-[#00c2bb]">
-                        Add to Cart - {{ formatCurrency(currentPrice * quantity) }}
-                    </button>
-                </div>
 
                 <!-- Features -->
                 <div class="space-y-4 text-sm text-gray-400">

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { ShoppingBag, Search, Menu, User, LogOut, Instagram, Facebook, Twitter, ArrowRight } from 'lucide-vue-next';
+import { ShoppingBag, Search, Menu, User, LogOut, Instagram, Facebook, Twitter, ArrowRight, Heart } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/auth';
 import { useCartStore } from '../stores/cart';
+import { useWishlistStore } from '../stores/wishlist';
 import { useToast } from 'vue-toastification';
 import apiClient from '../utils/api';
 import AuthModal from '../components/AuthModal.vue';
@@ -10,6 +11,7 @@ import CartDrawer from '../components/CartDrawer.vue';
 
 const authStore = useAuthStore();
 const cartStore = useCartStore();
+const wishlistStore = useWishlistStore();
 const toast = useToast();
 const showAuthModal = ref(false);
 const showCartDrawer = ref(false);
@@ -27,10 +29,14 @@ const fetchCategories = async () => {
 
 onMounted(() => {
     fetchCategories();
+    if (authStore.isAuthenticated) {
+        wishlistStore.fetchWishlist();
+    }
 });
 
 const handleLogout = () => {
   authStore.logout();
+  wishlistStore.items = []; // Clear wishlist on logout
   showUserMenu.value = false;
   toast.info("Bạn đã đăng xuất. Hẹn gặp lại! 👋");
 };
@@ -73,13 +79,26 @@ const handleLogout = () => {
           
           <!-- Icons -->
           <div class="flex gap-6 items-center">
-            <button class="icon-btn"><Search :size="20" stroke-width="2.5" /></button>
+            <button class="icon-btn focus:outline-none"><Search :size="20" stroke-width="2.5" /></button>
             
+            <!-- Wishlist Link -->
+            <router-link to="/profile" @click="() => {}" class="icon-btn relative group focus:outline-none">
+                <Heart :size="20" stroke-width="2.5" />
+                <span v-if="wishlistStore.items.length > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow-[0_0_8px_rgba(239,68,68,0.5)]">
+                    {{ wishlistStore.items.length }}
+                </span>
+            </router-link>
+
             <!-- User Logic -->
             <div class="relative">
-              <button v-if="authStore.isAuthenticated" @click="showUserMenu = !showUserMenu" class="icon-btn flex items-center gap-2">
-                 <User :size="20" stroke-width="2.5" />
-                 <span class="text-xs font-bold hidden lg:block">{{ authStore.user?.fullName }}</span>
+              <button v-if="authStore.isAuthenticated" @click="showUserMenu = !showUserMenu" class="icon-btn flex items-center gap-3 p-1.5 pr-4 group">
+                 <div class="w-9 h-9 rounded-full overflow-hidden border border-white/10 group-hover:border-cyan-500 transition-all shadow-[0_0_10px_rgba(255,255,255,0.05)]">
+                    <img v-if="authStore.user?.avatarUrl" :src="authStore.user.avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
+                    <div v-else class="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xs font-bold text-black">
+                        {{ authStore.user?.fullName?.charAt(0) }}
+                    </div>
+                 </div>
+                 <span class="text-xs font-bold hidden lg:block text-gray-400 group-hover:text-white transition-colors">{{ authStore.user?.fullName }}</span>
               </button>
               <button v-else @click="showAuthModal = true" class="icon-btn">
                  <User :size="20" stroke-width="2.5" />

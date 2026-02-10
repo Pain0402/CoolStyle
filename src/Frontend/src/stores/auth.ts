@@ -5,27 +5,25 @@ import apiClient from '../utils/api';
 export interface User {
     email: string;
     fullName: string;
+    avatarUrl?: string;
 }
 
 export const useAuthStore = defineStore('auth', () => {
-    const user = ref<User | null>(null);
+    const user = ref<User | null>(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null);
     const token = ref<string | null>(localStorage.getItem('token'));
 
     const isAuthenticated = computed(() => !!token.value);
 
     // If we have a token on startup, we should try to restore axios header. 
-    // Ideally we would verify token validity too, but this is simple MVP.
     if (token.value) {
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
-        // Note: We don't have user details persisted in localStorage in this simple version, 
-        // so user might be null even if token exists. 
-        // Improvement: Persist user object or fetch profile on init.
     }
 
     const setAuth = (newToken: string, newUser: User) => {
         token.value = newToken;
         user.value = newUser;
         localStorage.setItem('token', newToken);
+        localStorage.setItem('user', JSON.stringify(newUser));
 
         // Set axios header
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
@@ -35,19 +33,20 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = null;
         user.value = null;
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         delete apiClient.defaults.headers.common['Authorization'];
     };
 
     const register = async (payload: any) => {
         const response: any = await apiClient.post('/auth/register', payload);
         // Explicitly cast or access properties known to exist in response
-        setAuth(response.token, { email: response.email, fullName: response.fullName });
+        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl });
         return true;
     };
 
     const login = async (payload: any) => {
         const response: any = await apiClient.post('/auth/login', payload);
-        setAuth(response.token, { email: response.email, fullName: response.fullName });
+        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl });
         return true;
     };
 

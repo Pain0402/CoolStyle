@@ -1,5 +1,6 @@
 using FashionEcommerce.Application.DTOs;
 using FashionEcommerce.Application.Interfaces;
+using FashionEcommerce.API.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FashionEcommerce.API.Controllers;
@@ -19,6 +20,6 @@ public class CategoriesController : ControllerBase
     public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
     {
         var categories = await _categoryService.GetAllCategoriesAsync();
-        return Ok(categories);
+        return Ok(ApiResponse<IEnumerable<CategoryDto>>.Success(categories));
     }
 }

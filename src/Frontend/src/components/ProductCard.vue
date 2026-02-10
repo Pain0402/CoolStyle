@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useCartStore } from '../stores/cart';
+import { useWishlistStore } from '../stores/wishlist';
 import { useToast } from 'vue-toastification';
 import { ShoppingBag, Heart, Eye } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 interface Product {
   id: number;
@@ -10,16 +12,36 @@ interface Product {
   basePrice: number;
   thumbnailUrl: string;
   categoryName: string;
-  isNew?: boolean; // Optional property for UI
-  discount?: number; // Optional property for UI
+  isNew?: boolean; 
+  discount?: number;
 }
 
 const props = defineProps<{ product: Product }>();
 const cartStore = useCartStore();
+const wishlistStore = useWishlistStore();
 const toast = useToast();
 
+const isWishlisted = computed(() => wishlistStore.isInWishlist(props.product.id));
+
+const toggleWishlist = async (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const added = await wishlistStore.toggleWishlist(props.product);
+    if (added === undefined) {
+         toast.error("Vui lòng đăng nhập để yêu thích sản phẩm!");
+         return;
+    }
+    
+    if (added) {
+        toast.success("Đã thêm vào danh sách yêu thích!");
+    } else {
+        toast.info("Đã xóa khỏi danh sách yêu thích");
+    }
+};
+
 const addToCart = (e: Event) => {
-    e.stopPropagation(); // Prevent navigating to detail page if we click add to cart
+    e.stopPropagation(); 
     cartStore.addToCart(props.product);
     toast.success(`Đã thêm "${props.product.name}" vào giỏ hàng!`);
 };
@@ -28,7 +50,6 @@ const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 };
 
-// Mock "New" badge for recent items (purely visible logic for now)
 const isNew = props.product.id > 300 || props.product.isNew;
 </script>
 
@@ -48,8 +69,12 @@ const isNew = props.product.id > 300 || props.product.isNew;
         </span>
 
         <!-- Wishlist Button -->
-        <button class="absolute top-3 right-3 z-20 p-2 text-white/70 hover:text-red-500 hover:bg-white/10 rounded-full backdrop-blur-md transition-colors duration-300">
-           <Heart :size="20" />
+        <button 
+          @click="toggleWishlist"
+          :class="['absolute top-3 right-3 z-20 p-2 rounded-full backdrop-blur-md transition-all duration-300', 
+                   isWishlisted ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'text-white/70 bg-white/10 hover:text-red-500']"
+        >
+           <Heart :size="20" :fill="isWishlisted ? 'currentColor' : 'none'" />
         </button>
 
         <!-- Product Image -->

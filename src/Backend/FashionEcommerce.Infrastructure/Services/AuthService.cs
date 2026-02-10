@@ -34,6 +34,7 @@ public class AuthService : IAuthService
             UserName = request.Email,
             Email = request.Email,
             FullName = request.FullName,
+            AvatarUrl = $"https://api.dicebear.com/9.x/lorelei/svg?seed={request.Email}",
             CreatedAt = DateTime.UtcNow
         };
 
@@ -49,7 +50,8 @@ public class AuthService : IAuthService
         {
             Token = token,
             Email = user.Email,
-            FullName = user.FullName
+            FullName = user.FullName,
+            AvatarUrl = user.AvatarUrl
         };
     }
 
@@ -73,7 +75,8 @@ public class AuthService : IAuthService
         {
             Token = token,
             Email = user.Email!,
-            FullName = user.FullName
+            FullName = user.FullName,
+            AvatarUrl = user.AvatarUrl
         };
     }
 
