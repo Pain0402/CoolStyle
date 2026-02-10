@@ -51,4 +51,16 @@ public class ProductsController : ControllerBase
         }
         return Ok(ApiResponse<object>.Success(product));
     }
+
+    /// <summary>
+    /// Search products by keyword (for suggestions).
+    /// </summary>
+    /// <param name="q">Search keyword</param>
+    /// <returns>List of ProductDto (limited)</returns>
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchProducts([FromQuery] string q)
+    {
+        var products = await _productService.SearchProductsAsync(q);
+        return Ok(ApiResponse<object>.Success(products));
+    }
 }

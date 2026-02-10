@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { ShoppingBag, Search, Menu, User, LogOut, Instagram, Facebook, Twitter, ArrowRight, Heart } from 'lucide-vue-next';
+import { ref, onMounted, watch } from 'vue';
+import { ShoppingBag, Search, Menu, User, LogOut, Instagram, Facebook, Twitter, ArrowRight, Heart, X, Loader2 } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/auth';
 import { useCartStore } from '../stores/cart';
 import { useWishlistStore } from '../stores/wishlist';
@@ -8,15 +8,65 @@ import { useToast } from 'vue-toastification';
 import apiClient from '../utils/api';
 import AuthModal from '../components/AuthModal.vue';
 import CartDrawer from '../components/CartDrawer.vue';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const cartStore = useCartStore();
 const wishlistStore = useWishlistStore();
 const toast = useToast();
+const router = useRouter();
+
 const showAuthModal = ref(false);
 const showCartDrawer = ref(false);
 const showUserMenu = ref(false);
 const categories = ref<any[]>([]);
+
+// Search State
+const showSearch = ref(false);
+const searchQuery = ref('');
+const searchResults = ref<any[]>([]);
+const isSearching = ref(false);
+let searchTimeout: any = null;
+
+const fetchSuggestions = async () => {
+    if (searchQuery.value.length < 2) {
+        searchResults.value = [];
+        return;
+    }
+
+    isSearching.value = true;
+    try {
+        const res: any = await apiClient.get(`/products/search?q=${searchQuery.value}`);
+        searchResults.value = res || [];
+    } catch (e) {
+        console.error("Search failed", e);
+    } finally {
+        isSearching.value = false;
+    }
+};
+
+watch(searchQuery, () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(fetchSuggestions, 300);
+});
+
+const closeSearch = () => {
+    showSearch.value = false;
+    searchQuery.value = '';
+    searchResults.value = [];
+};
+
+const goToProduct = (slug: string) => {
+    router.push(`/product/${slug}`);
+    closeSearch();
+};
+
+const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+
+// Custom Directives
+const vFocus = {
+  mounted: (el: any) => el.focus()
+}
 
 const fetchCategories = async () => {
     try {
@@ -79,7 +129,67 @@ const handleLogout = () => {
           
           <!-- Icons -->
           <div class="flex gap-6 items-center">
-            <button class="icon-btn focus:outline-none"><Search :size="20" stroke-width="2.5" /></button>
+            <button @click="showSearch = true" class="icon-btn focus:outline-none"><Search :size="20" stroke-width="2.5" /></button>
+            
+            <!-- Professional Search Overlay -->
+            <div v-if="showSearch" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl animate-fade-in flex flex-col pt-32 px-6">
+                <button @click="closeSearch" class="absolute top-8 right-8 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition">
+                    <X :size="24" />
+                </button>
+
+                <div class="max-w-3xl mx-auto w-full">
+                    <div class="relative group">
+                        <Search class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 transition" :size="24" />
+                        <input 
+                            v-model="searchQuery"
+                            v-focus
+                            type="text" 
+                            placeholder="Type to find your style..."
+                            class="w-full bg-white/5 border-b-2 border-white/10 px-16 py-6 text-2xl font-display focus:outline-none focus:border-cyan-500 transition placeholder-gray-600 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+                            @keyup.esc="closeSearch"
+                        >
+                        <Loader2 v-if="isSearching" class="absolute right-6 top-1/2 -translate-y-1/2 text-cyan-400 animate-spin" :size="24" />
+                    </div>
+
+                    <!-- Results -->
+                    <div class="mt-8 max-h-[60vh] overflow-y-auto space-y-4 custom-scrollbar">
+                        <div v-if="searchQuery.length >= 2 && searchResults.length === 0 && !isSearching" class="text-center py-20 text-gray-500">
+                             No results found for "<span class="text-white">{{ searchQuery }}</span>"
+                        </div>
+
+                        <div 
+                            v-for="product in searchResults" 
+                            :key="product.id"
+                            @click="goToProduct(product.slug)"
+                            class="flex items-center gap-6 p-4 rounded-2xl bg-white/5 border border-transparent hover:border-cyan-500/30 hover:bg-white/10 transition cursor-pointer group"
+                        >
+                            <div class="w-16 h-20 rounded-lg overflow-hidden bg-black flex-shrink-0">
+                                <img :src="product.thumbnailUrl" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="Result">
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-lg group-hover:text-cyan-400 transition">{{ product.name }}</h4>
+                                <p class="text-xs text-cyan-500 uppercase tracking-widest">{{ product.categoryName }}</p>
+                            </div>
+                            <div class="text-xl font-black text-white">
+                                {{ formatCurrency(product.basePrice) }}
+                            </div>
+                            <ArrowRight :size="18" class="text-gray-600 group-hover:text-cyan-400 transform translate-x-[-10px] group-hover:translate-x-0 opacity-0 group-hover:opacity-100 transition-all" />
+                        </div>
+                    </div>
+
+                    <!-- Popular Searches / Categories (Optional/Beauty) -->
+                    <div v-if="searchQuery.length < 2" class="mt-12 animate-fade-in-up">
+                        <h5 class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-6">Popular Categories</h5>
+                        <div class="flex flex-wrap gap-4">
+                            <button v-for="cat in categories.slice(0, 5)" :key="cat.id" 
+                                    @click="searchQuery = cat.name"
+                                    class="px-6 py-2 rounded-full bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:text-cyan-400 transition text-sm">
+                                {{ cat.name }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- Wishlist Link -->
             <router-link to="/profile" @click="() => {}" class="icon-btn relative group focus:outline-none">
@@ -247,5 +357,27 @@ const handleLogout = () => {
 }
 .animate-fade-in-up {
     animation: fade-in-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 211, 238, 0.3);
 }
 </style>

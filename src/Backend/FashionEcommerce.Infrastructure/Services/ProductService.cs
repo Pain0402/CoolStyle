@@ -74,4 +74,28 @@ public class ProductService : IProductService
             }).ToList()
         };
     }
+
+    public async Task<List<ProductDto>> SearchProductsAsync(string keyword, int limit = 10)
+    {
+        if (string.IsNullOrWhiteSpace(keyword)) return new List<ProductDto>();
+
+        var products = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Images)
+            .AsNoTracking()
+            .Where(p => p.Name.Contains(keyword) || p.Description.Contains(keyword) || p.Category.Name.Contains(keyword))
+            .Take(limit)
+            .ToListAsync();
+
+        return products.Select(p => new ProductDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Slug = p.Slug,
+            BasePrice = p.BasePrice,
+            CategoryName = p.Category.Name,
+            ThumbnailUrl = p.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()?.Url ?? "",
+            VariantCount = 0 // Optimization: don't load variants for search suggestions
+        }).ToList();
+    }
 }
