@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import { useAuthStore } from '../stores/auth';
 import apiClient from '../utils/api';
@@ -11,6 +11,31 @@ const authStore = useAuthStore();
 const toast = useToast();
 const activeTab = ref('profile'); // profile, orders, addresses, wishlist
 const loading = ref(false);
+
+const avatarStyles = [
+    { name: 'Lorelei', value: 'lorelei' },
+    { name: 'Avataaars', value: 'avataaars' },
+    { name: 'Robots', value: 'bottts' },
+    { name: 'Pixel Art', value: 'pixel-art' },
+    { name: 'Emoji', value: 'fun-emoji' },
+    { name: 'Notionist', value: 'notionists' }
+];
+
+const selectedStyle = ref('lorelei');
+const avatarSeed = ref('');
+
+const currentAvatarUrl = computed(() => {
+    const seed = avatarSeed.value || profile.value.email || 'random';
+    return `https://api.dicebear.com/9.x/${selectedStyle.value}/svg?seed=${seed}`;
+});
+
+const shuffleAvatar = () => {
+    avatarSeed.value = Math.random().toString(36).substring(7);
+};
+
+const selectStyle = (style: string) => {
+    selectedStyle.value = style;
+};
 
 // Data
 const profile = ref<any>({});
@@ -44,6 +69,15 @@ const fetchProfileData = async () => {
         addresses.value = addressRes as any[];
         wishlist.value = wishlistRes as any[];
 
+        // Extract style from existing avatarUrl if matches pattern
+        if (profile.value.avatarUrl) {
+            const match = profile.value.avatarUrl.match(/9\.x\/([^/]+)\/svg\?seed=(.+)/);
+            if (match) {
+                selectedStyle.value = match[1];
+                avatarSeed.value = match[2];
+            }
+        }
+
     } catch (e) {
         console.error(e);
         toast.error("Failed to load profile data");
@@ -54,10 +88,21 @@ const fetchProfileData = async () => {
 
 const updateProfile = async () => {
     try {
-        await apiClient.put('/user/profile', {
+        const updateData = {
             fullName: profile.value.fullName,
-            phone: profile.value.phone
+            phone: profile.value.phone,
+            avatarUrl: currentAvatarUrl.value
+        };
+        
+        await apiClient.put('/user/profile', updateData);
+        
+        // Sync with AuthStore
+        authStore.updateUser({
+            email: profile.value.email,
+            fullName: profile.value.fullName,
+            avatarUrl: currentAvatarUrl.value
         });
+
         toast.success("Profile updated successfully!");
     } catch (e) {
         toast.error("Failed to update profile");
@@ -134,15 +179,15 @@ const logout = () => {
                 <!-- Sidebar -->
                 <aside class="w-full md:w-64 space-y-2">
                     <div class="p-6 rounded-2xl glass border border-white/10 mb-6 text-center">
-                        <div class="w-24 h-24 rounded-full border-2 border-white/10 shadow-2xl mx-auto mb-4 p-0.5 group">
-                            <div class="w-full h-full rounded-full overflow-hidden">
-                                <img v-if="profile.avatarUrl" :src="profile.avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
-                                <div v-else class="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-3xl font-bold text-black">
-                                    {{ profile.fullName?.charAt(0) }}
-                                </div>
+                        <div class="w-24 h-24 rounded-full border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.2)] mx-auto mb-4 p-1 group relative">
+                            <div class="w-full h-full rounded-full overflow-hidden bg-white/5">
+                                <img :src="currentAvatarUrl" alt="Avatar" class="w-full h-full object-cover" />
                             </div>
+                            <button @click="shuffleAvatar" class="absolute -bottom-1 -right-1 w-8 h-8 bg-cyan-500 text-black rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition active:rotate-180" title="Dice Roll">
+                                <Plus :size="16" />
+                            </button>
                         </div>
-                        <h2 class="font-bold truncate text-lg">{{ profile.fullName }}</h2>
+                        <h2 class="font-bold truncate text-lg tracking-wide">{{ profile.fullName }}</h2>
                         <p class="text-xs text-gray-400 truncate">{{ profile.email }}</p>
                     </div>
 
@@ -170,6 +215,28 @@ const logout = () => {
                     <!-- Profile Tab -->
                     <div v-if="activeTab === 'profile'" class="max-w-xl animate-fade-in-up">
                         <h2 class="text-2xl font-bold mb-6 font-display">Identity Protocol</h2>
+                        
+                        <!-- Avatar Picker -->
+                        <div class="mb-8 p-6 bg-white/5 border border-white/10 rounded-2xl">
+                            <label class="block text-sm text-gray-400 mb-4 font-bold uppercase tracking-widest">Avatar Designer</label>
+                            <div class="flex flex-wrap gap-3 mb-6">
+                                <button v-for="style in avatarStyles" :key="style.value" 
+                                        @click="selectStyle(style.value)"
+                                        :class="['px-4 py-2 rounded-lg border text-sm transition', 
+                                                 selectedStyle === style.value ? 'bg-cyan-500 text-black border-cyan-500' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white']">
+                                    {{ style.name }}
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <div class="w-20 h-20 rounded-full overflow-hidden bg-white/5 border border-white/10 shadow-lg">
+                                    <img :src="currentAvatarUrl" alt="Avatar Preview" class="w-full h-full object-cover" />
+                                </div>
+                                <button @click="shuffleAvatar" class="flex items-center gap-2 px-6 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20 transition group">
+                                    <Plus :size="18" class="group-active:rotate-180 transition-transform" /> Shuffle Persona
+                                </button>
+                            </div>
+                        </div>
+
                         <form @submit.prevent="updateProfile" class="space-y-6">
                             <div>
                                 <label class="block text-sm text-gray-400 mb-2">Full Name</label>
@@ -183,8 +250,8 @@ const logout = () => {
                                 <label class="block text-sm text-gray-400 mb-2">Phone Number</label>
                                 <input v-model="profile.phone" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-cyan-500 focus:outline-none transition">
                             </div>
-                            <button type="submit" class="btn-primary bg-cyan-500 text-black hover:bg-cyan-400 px-8 py-3 rounded-xl font-bold">
-                                Update Identity
+                            <button type="submit" class="btn-primary bg-cyan-500 text-black hover:bg-cyan-400 px-8 py-3 rounded-xl font-bold transition-all shadow-none hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+                                Sync Identity
                             </button>
                         </form>
                     </div>

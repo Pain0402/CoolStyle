@@ -62,6 +62,7 @@ public class UserService : IUserService
 
         user.FullName = model.FullName;
         user.PhoneNumber = model.Phone;
+        user.AvatarUrl = model.AvatarUrl;
 
         await _userManager.UpdateAsync(user);
     }
