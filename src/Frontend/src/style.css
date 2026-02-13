@@ -165,3 +165,72 @@
     box-shadow: 0 0 25px rgba(0, 242, 234, 0.6);
   }
 }
+
+/* Custom Toastification Styling */
+.Vue-Toastification__toast {
+    font-family: var(--font-body) !important;
+    border-radius: 1rem !important;
+    padding: 1.25rem 1.5rem !important;
+    min-height: auto !important;
+    backdrop-filter: blur(16px) !important;
+    background-color: rgba(15, 16, 18, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8) !important;
+    color: #fff !important;
+    overflow: hidden;
+}
+
+/* Success */
+.Vue-Toastification__toast--success {
+    border-left: 3px solid #00f2ea !important; /* Neon Cyan */
+    background: linear-gradient(90deg, rgba(0, 242, 234, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+}
+
+/* Error */
+.Vue-Toastification__toast--error {
+    border-left: 3px solid #ff0055 !important; /* Neon Purple/Red */
+    background: linear-gradient(90deg, rgba(255, 0, 85, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+}
+
+/* Info */
+.Vue-Toastification__toast--info {
+    border-left: 3px solid #4361ee !important; /* Neon Blue */
+    background: linear-gradient(90deg, rgba(67, 97, 238, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+}
+
+/* Warning */
+.Vue-Toastification__toast--warning {
+    border-left: 3px solid #fbbf24 !important; /* Amber */
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+}
+
+.Vue-Toastification__toast-body {
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    color: #e2e8f0 !important;
+}
+
+.Vue-Toastification__close-button {
+    color: rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.2s;
+    font-size: 1.2rem !important;
+    opacity: 1 !important;
+}
+.Vue-Toastification__close-button:hover {
+    color: #fff !important;
+    transform: rotate(90deg);
+}
+
+.Vue-Toastification__progress-bar {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    height: 2px !important;
+    bottom: 0 !important;
+    opacity: 0.5 !important;
+}
+
+.Vue-Toastification__icon {
+    margin-right: 12px !important;
+    width: 20px !important;
+    height: 20px !important;
+}
