@@ -2,8 +2,10 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
+import CyberParticles from '../components/CyberParticles.vue';
 import apiClient from '../utils/api';
 import { ArrowRight, ShoppingBag, Zap, ShieldCheck } from 'lucide-vue-next';
+import anime from 'animejs';
 
 // State
 const products = ref<any[]>([]);
@@ -72,9 +74,38 @@ const fetchProducts = async () => {
     }
 };
 
+const animateText = () => {
+    // Wrap every letter in a span
+    const textWrapper = document.querySelector('.ml11 .letters');
+    if (textWrapper && textWrapper.textContent) {
+        textWrapper.innerHTML = textWrapper.textContent.replace(/([^\x00-\x80]|\w)/g, "<span class='letter'>$&</span>");
+
+        anime.timeline({loop: false})
+        .add({
+            targets: '.ml11 .letter',
+            translateY: ["2.1em", 0],
+            translateZ: 0,
+            duration: 950,
+            delay: (_el: any, i: number) => 60 * i,
+            easing: "easeOutExpo"
+        });
+    }
+}
+
+const setTheme = (theme: string) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    // Optional: Save to localStorage for persistence
+    localStorage.setItem('coolstyle-theme', theme);
+};
+
 onMounted(() => {
     fetchProducts();
     startCountdown();
+    animateText();
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('coolstyle-theme') || 'default';
+    setTheme(savedTheme);
 });
 
 onUnmounted(() => {
@@ -84,33 +115,35 @@ onUnmounted(() => {
 
 <template>
   <MainLayout>
-    <!-- 1. Hero Section (Modern Fashion Design) -->
+    <!-- 1. Hero Section (Modern Fashion Design + Three.js + Anime.js) -->
     <section class="relative min-h-[90vh] flex items-center bg-transparent overflow-hidden pt-16">
         
-        <!-- Background Elements -->
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-b from-cyan-500/10 to-transparent rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
-        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4"></div>
+        <!-- Three.js Background -->
+        <CyberParticles />
 
-        <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+        <!-- Background Elements (Fallback/Enhancement) -->
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-b from-cyan-500/10 to-transparent rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+
+        <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10 pointer-events-none">
             
-            <!-- Left: Content -->
-            <div data-aos="fade-right" data-aos-duration="1000">
+            <!-- Left: Content (Pointer Events Auto to interact with buttons) -->
+            <div class="pointer-events-auto" data-aos="fade-right" data-aos-duration="1000">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="w-12 h-[2px] bg-cyan-500"></span>
                     <span class="text-cyan-400 font-bold uppercase tracking-[0.3em] text-sm">Trend 2025</span>
                 </div>
 
-                <h1 class="font-display text-6xl md:text-8xl font-black text-white leading-[0.9] mb-8">
-                    STREET <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-400 to-gray-600">WEAR.</span>
-                    <span class="block text-4xl md:text-5xl font-light text-gray-400 mt-2 italic">Collection</span>
+                <h1 class="ml11 font-display text-6xl md:text-8xl font-black text-white leading-[0.9] mb-8 overflow-hidden">
+                    <span class="letters block">STREET WEAR.</span>
+                    <span class="block text-4xl md:text-5xl font-light text-gray-400 mt-2 italic opacity-0 animate-fade-in" style="animation-delay: 1s; animation-fill-mode: forwards;">Collection</span>
                 </h1>
 
-                <p class="text-gray-400 text-lg mb-10 max-w-lg leading-relaxed border-l-2 border-white/10 pl-6">
+                <p class="text-gray-400 text-lg mb-10 max-w-lg leading-relaxed border-l-2 border-white/10 pl-6 animate-fade-in-up" style="animation-delay: 0.5s">
                     Định hình phong cách cá nhân với những thiết kế độc bản. Sự kết hợp hoàn hảo giữa công nghệ và thời trang đường phố.
                 </p>
 
-                <div class="flex items-center gap-6">
+                <div class="flex items-center gap-6 animate-fade-in-up" style="animation-delay: 0.7s">
                     <button class="btn-primary bg-white text-black hover:bg-cyan-400 hover:text-black border-none px-10 py-4 text-lg shadow-[0_0_20px_rgba(255,255,255,0.2)]">
                         Shop Now
                     </button>
@@ -121,9 +154,18 @@ onUnmounted(() => {
                         <span>View Lookbook</span>
                     </button>
                 </div>
+                
+                <!-- Theme Switcher (Demo Only) -->
+                <div class="mt-8 flex gap-4 animate-fade-in-up" style="animation-delay: 0.9s">
+                    <button @click="setTheme('default')" class="w-8 h-8 rounded-full bg-[#00f2ea] border-2 border-white/50 hover:scale-110 transition shadow-[0_0_10px_#00f2ea]" title="Cyberpunk"></button>
+                    <button @click="setTheme('gold')" class="w-8 h-8 rounded-full bg-[#FFD700] border-2 border-white/50 hover:scale-110 transition shadow-[0_0_10px_#FFD700]" title="Luxury Gold"></button>
+                    <button @click="setTheme('acid')" class="w-8 h-8 rounded-full bg-[#CCFF00] border-2 border-white/50 hover:scale-110 transition shadow-[0_0_10px_#CCFF00]" title="Acid Green"></button>
+                    <button @click="setTheme('sunset')" class="w-8 h-8 rounded-full bg-[#FF5F1F] border-2 border-white/50 hover:scale-110 transition shadow-[0_0_10px_#FF5F1F]" title="Sunset Vapor"></button>
+                    <button @click="setTheme('future')" class="w-8 h-8 rounded-full bg-[#FFFFFF] border-2 border-white/50 hover:scale-110 transition shadow-[0_0_10px_#FFFFFF]" title="Future Mono"></button>
+                </div>
 
                 <!-- Stats / Trust -->
-                <div class="mt-16 grid grid-cols-3 gap-8">
+                <div class="mt-16 grid grid-cols-3 gap-8 animate-fade-in" style="animation-delay: 1s">
                     <div>
                         <h4 class="text-3xl font-bold text-white font-display">2k+</h4>
                         <p class="text-gray-500 text-xs uppercase tracking-wider mt-1">New Drops</p>
@@ -140,7 +182,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Right: Visual -->
-            <div class="relative h-full flex justify-center lg:justify-end" data-aos="fade-left" data-aos-duration="1200">
+            <div class="relative h-full flex justify-center lg:justify-end pointer-events-auto" data-aos="fade-left" data-aos-duration="1200">
                 <!-- Decorative Circle -->
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] border border-white/10 rounded-full animate-[spin_30s_linear_infinite]"></div>
                 
@@ -203,13 +245,13 @@ onUnmounted(() => {
                           <span class="px-2 py-1 bg-white/10 backdrop-blur text-xs rounded text-white mb-2 inline-block border border-white/10">{{ cat.count }} Items</span>
                           <h3 class="text-3xl font-display font-bold text-white group-hover:text-cyan-400 transition-colors">{{ cat.name }}</h3>
                       </div>
-                 </div>
+                  </div>
              </div>
         </div>
     </section>
 
     <!-- 2.5 Flash Sale / Best Sellers -->
-    <section class="py-24 bg-gradient-to-r from-[#1a0033] to-black relative overflow-hidden border-y border-white/5">
+    <section class="py-24 bg-theme-gradient relative overflow-hidden border-y border-white/5">
         <!-- Background Effects -->
         <div class="absolute -left-20 top-0 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px]"></div>
         <div class="absolute right-0 bottom-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[80px]"></div>
@@ -318,5 +360,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Scoped styles mainly handle the float animation delay/specifics if needed */
+.ml11 .letter {
+  display: inline-block;
+  line-height: 1em;
+}
 </style>

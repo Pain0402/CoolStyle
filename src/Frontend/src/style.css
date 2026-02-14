@@ -3,14 +3,14 @@
 @import 'aos/dist/aos.css';
 
 @theme {
-  /* Colors */
-  --color-dark-bg: #050505;
-  --color-dark-surface: #0f1012;
-  --color-dark-card: #18191c;
+  /* Colors - Mapping to CSS Variables for Runtime Switching */
+  --color-dark-bg: var(--color-dark-bg);
+  --color-dark-surface: var(--color-dark-surface);
+  --color-dark-card: var(--color-dark-card);
 
-  --color-neon-cyan: #00f2ea;
-  --color-neon-purple: #ff0055;
-  --color-neon-blue: #4361ee;
+  --color-neon-cyan: var(--color-neon-cyan);
+  --color-neon-purple: var(--color-neon-purple);
+  --color-neon-blue: var(--color-neon-blue);
 
   /* Fonts */
   --font-display: 'Outfit', sans-serif;
@@ -20,17 +20,74 @@
   --spacing-128: 32rem;
 }
 
+/* 🎨 THEME DEFINITIONS */
+:root {
+  /* Default: Cyberpunk Luxury */
+  --color-dark-bg: #050505;
+  --color-dark-surface: #0f1012;
+  --color-dark-card: #18191c;
+  --color-neon-cyan: #00f2ea;
+  --color-neon-purple: #ff0055;
+  --color-neon-blue: #4361ee;
+  --bg-section-gradient: linear-gradient(to right, #1a0033, #000000);
+}
+
+/* 1. Luxury Gold */
+[data-theme="gold"] {
+  --color-dark-bg: #0A0A0A;
+  --color-dark-surface: #141414;
+  --color-dark-card: #1F1F1F;
+  --color-neon-cyan: #FFD700;
+  --color-neon-purple: #C0C0C0;
+  --color-neon-blue: #DAA520;
+  --bg-section-gradient: linear-gradient(to right, #332b00, #000000);
+}
+
+/* 2. Acid Green (Street Sport) */
+[data-theme="acid"] {
+  --color-dark-bg: #121212;
+  --color-dark-surface: #1E1E1E;
+  --color-dark-card: #252525;
+  --color-neon-cyan: #CCFF00;
+  --color-neon-purple: #7B2CBF;
+  --color-neon-blue: #3A0CA3;
+  --bg-section-gradient: linear-gradient(to right, #1a3300, #000000);
+}
+
+/* 3. Sunset Vapor (Retrowave) */
+[data-theme="sunset"] {
+  --color-dark-bg: #1A0B2E;
+  --color-dark-surface: #2D1B4E;
+  --color-dark-card: #432C7A;
+  --color-neon-cyan: #FF5F1F;
+  --color-neon-purple: #FF007F;
+  --color-neon-blue: #F72585;
+  --bg-section-gradient: linear-gradient(to right, #33001a, #000000);
+}
+
+/* 4. Future Monochrome */
+[data-theme="future"] {
+  --color-dark-bg: #000000;
+  --color-dark-surface: #0F0F0F;
+  --color-dark-card: #1A1A1A;
+  --color-neon-cyan: #FFFFFF;
+  --color-neon-purple: #888888;
+  --color-neon-blue: #444444;
+  --bg-section-gradient: linear-gradient(to right, #1a1a1a, #000000);
+}
+
 @layer base {
   body {
     @apply antialiased text-slate-200;
     font-family: var(--font-body);
     overflow-x: hidden;
-    background-color: #050505;
+    background-color: var(--color-dark-bg);
     background-image:
-      radial-gradient(circle at 50% 0%, #1e1e24 0%, #050505 60%),
-      linear-gradient(to bottom, #050505, #0a0a0f);
+      radial-gradient(circle at 50% 0%, #1e1e24 0%, var(--color-dark-bg) 60%),
+      linear-gradient(to bottom, var(--color-dark-bg), #0a0a0f);
     min-height: 100vh;
     position: relative;
+    transition: background-color 0.5s ease;
   }
 
   /* Noise Texture Overlay */
@@ -62,18 +119,21 @@
 
   /* Dark Glass Panel */
   .glass {
-    @apply backdrop-blur-xl bg-gray-900 border border-gray-800 shadow-lg;
+    @apply backdrop-blur-xl border border-gray-800 shadow-lg;
+    background-color: var(--color-dark-surface);
   }
 
   /* Interactive Glass Card */
   .glass-card {
-    @apply relative overflow-hidden rounded-2xl bg-gray-900 border border-gray-800 hover:border-gray-700 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 ease-out;
+    @apply relative overflow-hidden rounded-2xl border border-gray-800 hover:border-gray-700 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 ease-out;
+    background-color: var(--color-dark-card);
   }
 
   /* Glow Effect */
   .glow-effect::before {
     content: '';
-    @apply absolute -inset-1 bg-gradient-to-r from-cyan-900 to-purple-900 rounded-2xl blur-xl opacity-0 transition-opacity duration-500;
+    @apply absolute -inset-1 rounded-2xl blur-xl opacity-0 transition-opacity duration-500;
+    background: linear-gradient(to right, var(--color-neon-cyan), var(--color-neon-purple));
     z-index: -1;
   }
 
@@ -87,8 +147,14 @@
   }
 
   .text-neon {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#00f2ea] to-[#4361ee];
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, var(--color-neon-cyan), var(--color-neon-blue));
     text-shadow: 0 0 20px rgba(0, 242, 234, 0.3);
+  }
+
+  /* Special Background Gradient Section */
+  .bg-theme-gradient {
+    background: var(--bg-section-gradient);
   }
 
   /* Buttons */
@@ -116,7 +182,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-[#050505];
+  background-color: var(--color-dark-bg);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -168,69 +234,74 @@
 
 /* Custom Toastification Styling */
 .Vue-Toastification__toast {
-    font-family: var(--font-body) !important;
-    border-radius: 1rem !important;
-    padding: 1.25rem 1.5rem !important;
-    min-height: auto !important;
-    backdrop-filter: blur(16px) !important;
-    background-color: rgba(15, 16, 18, 0.85) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8) !important;
-    color: #fff !important;
-    overflow: hidden;
+  font-family: var(--font-body) !important;
+  border-radius: 1rem !important;
+  padding: 1.25rem 1.5rem !important;
+  min-height: auto !important;
+  backdrop-filter: blur(16px) !important;
+  background-color: rgba(15, 16, 18, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8) !important;
+  color: #fff !important;
+  overflow: hidden;
 }
 
 /* Success */
 .Vue-Toastification__toast--success {
-    border-left: 3px solid #00f2ea !important; /* Neon Cyan */
-    background: linear-gradient(90deg, rgba(0, 242, 234, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+  border-left: 3px solid #00f2ea !important;
+  /* Neon Cyan */
+  background: linear-gradient(90deg, rgba(0, 242, 234, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
 }
 
 /* Error */
 .Vue-Toastification__toast--error {
-    border-left: 3px solid #ff0055 !important; /* Neon Purple/Red */
-    background: linear-gradient(90deg, rgba(255, 0, 85, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+  border-left: 3px solid #ff0055 !important;
+  /* Neon Purple/Red */
+  background: linear-gradient(90deg, rgba(255, 0, 85, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
 }
 
 /* Info */
 .Vue-Toastification__toast--info {
-    border-left: 3px solid #4361ee !important; /* Neon Blue */
-    background: linear-gradient(90deg, rgba(67, 97, 238, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+  border-left: 3px solid #4361ee !important;
+  /* Neon Blue */
+  background: linear-gradient(90deg, rgba(67, 97, 238, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
 }
 
 /* Warning */
 .Vue-Toastification__toast--warning {
-    border-left: 3px solid #fbbf24 !important; /* Amber */
-    background: linear-gradient(90deg, rgba(251, 191, 36, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
+  border-left: 3px solid #fbbf24 !important;
+  /* Amber */
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.05) 0%, rgba(15, 16, 18, 0.95) 100%) !important;
 }
 
 .Vue-Toastification__toast-body {
-    font-size: 0.9rem !important;
-    font-weight: 500 !important;
-    line-height: 1.5 !important;
-    color: #e2e8f0 !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: #e2e8f0 !important;
 }
 
 .Vue-Toastification__close-button {
-    color: rgba(255, 255, 255, 0.3) !important;
-    transition: all 0.2s;
-    font-size: 1.2rem !important;
-    opacity: 1 !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+  transition: all 0.2s;
+  font-size: 1.2rem !important;
+  opacity: 1 !important;
 }
+
 .Vue-Toastification__close-button:hover {
-    color: #fff !important;
-    transform: rotate(90deg);
+  color: #fff !important;
+  transform: rotate(90deg);
 }
 
 .Vue-Toastification__progress-bar {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    height: 2px !important;
-    bottom: 0 !important;
-    opacity: 0.5 !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  height: 2px !important;
+  bottom: 0 !important;
+  opacity: 0.5 !important;
 }
 
 .Vue-Toastification__icon {
-    margin-right: 12px !important;
-    width: 20px !important;
-    height: 20px !important;
+  margin-right: 12px !important;
+  width: 20px !important;
+  height: 20px !important;
 }
