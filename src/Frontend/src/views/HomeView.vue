@@ -146,8 +146,8 @@ onUnmounted(() => {
                 
                 <!-- Main Image Masked -->
                 <div class="relative z-10 w-[350px] md:w-[450px] h-[500px] md:h-[650px] rounded-t-[200px] rounded-b-[40px] overflow-hidden border-4 border-white/5 bg-[#111]">
-                    <img src="https://images.unsplash.com/photo-1540498777894-0d3e5e431525?q=80&w=1500&auto=format&fit=crop" 
-                         class="w-full h-full object-cover hover:scale-105 transition duration-700" alt="Model">
+                    <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=1500&auto=format&fit=crop" 
+                         class="w-full h-full object-cover hover:scale-105 transition duration-700" alt="Hoodie Streetwear Model">
                     
                     <!-- Floating Card -->
                     <div class="absolute bottom-8 left-8 right-8 glass p-4 rounded-xl flex items-center gap-4 animate-float">
@@ -155,7 +155,7 @@ onUnmounted(() => {
                             <ShoppingBag :size="20"/>
                         </div>
                         <div>
-                            <p class="text-white font-bold text-sm">Hoodie Oversize Essential</p>
+                            <p class="text-white font-bold text-sm">Air Jordan 1 Retro High OG ‘Chicago’ 2015</p>
                             <p class="text-cyan-400 font-bold text-xs">$89.00</p>
                         </div>
                         <button class="ml-auto w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-500 hover:text-black transition">
