@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useCartStore } from '../stores/cart';
 import { useAuthStore } from '../stores/auth';
 import { createOrder } from '../services/order';
+import apiClient from '../utils/api';
 import { useToast } from 'vue-toastification';
 import { X } from 'lucide-vue-next';
 
@@ -18,21 +19,32 @@ const formData = ref({
     customerEmail: authStore.user?.email || '',
     customerPhone: '',
     shippingAddress: '',
-    note: ''
+    note: '',
+    paymentMethod: 0 // 0 = COD, 1 = VNPAY, 2 = MOMO
 });
 
 const handleSubmit = async () => {
     loading.value = true;
     try {
-        await createOrder({
+        const order: any = await createOrder({
             ...formData.value,
             items: cartStore.items.map(i => ({ productId: i.productId, quantity: i.quantity }))
         });
 
         cartStore.clearCart();
-        toast.success("Đặt hàng thành công! Cảm ơn bạn đã mua sắm.");
-        emit('success');
-        emit('close');
+        
+        if (formData.value.paymentMethod === 1 || formData.value.paymentMethod === 2) { // VNPAY OR MOMO
+            toast.info("Đang chuyển hướng tới cổng thanh toán...");
+            const payRes: any = await apiClient.get(`/orders/${order.id}/pay`);
+            if (payRes) {
+                window.location.href = payRes;
+            }
+        } else {
+            toast.success("Đặt hàng thành công!");
+            emit('success');
+            emit('close');
+        }
+
     } catch (err: any) {
         toast.error(err.response?.data?.message || "Có lỗi xảy ra khi đặt hàng.");
     } finally {
@@ -85,6 +97,30 @@ const handleSubmit = async () => {
                  <div>
                     <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Ghi chú (Tùy chọn)</label>
                     <textarea v-model="formData.note" rows="2" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition placeholder-gray-600" placeholder="Lời nhắn cho shipper..."></textarea>
+                </div>
+
+                <!-- Payment Method Selection -->
+                <div>
+                     <label class="block text-xs font-bold uppercase text-gray-500 mb-2">Phương thức thanh toán</label>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                         <!-- COD -->
+                         <div @click="formData.paymentMethod = 0" 
+                              :class="['border rounded-xl p-4 cursor-pointer transition flex items-center gap-3', formData.paymentMethod === 0 ? 'border-cyan-400 bg-cyan-400/10 text-cyan-400' : 'border-white/10 text-gray-400 hover:border-white/30 hover:text-white']">
+                             <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition" :class="formData.paymentMethod === 0 ? 'border-cyan-400' : 'border-gray-500'">
+                                 <div v-if="formData.paymentMethod === 0" class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                             </div>
+                             <span class="font-bold">Thanh toán khi nhận hàng (COD)</span>
+                         </div>
+                         
+                         <!-- VNPAY -->
+                         <div @click="formData.paymentMethod = 1" 
+                              :class="['border rounded-xl p-4 cursor-pointer transition flex items-center gap-3', formData.paymentMethod === 1 ? 'border-cyan-400 bg-cyan-400/10 text-cyan-400' : 'border-white/10 text-gray-400 hover:border-white/30 hover:text-white']">
+                             <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition" :class="formData.paymentMethod === 1 ? 'border-cyan-400' : 'border-gray-500'">
+                                 <div v-if="formData.paymentMethod === 1" class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                             </div>
+                             <span class="font-bold">Thanh toán qua VNPay</span>
+                         </div>
+                     </div>
                 </div>
 
                 <div class="bg-white/5 border border-white/10 p-5 rounded-xl flex justify-between items-center text-sm font-medium">

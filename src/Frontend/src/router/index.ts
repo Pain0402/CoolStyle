@@ -42,6 +42,11 @@ const router = createRouter({
             meta: { requiresAuth: true }
         },
         {
+            path: '/checkout/success',
+            name: 'checkout-success',
+            component: () => import('../views/CheckoutSuccessView.vue')
+        },
+        {
             path: '/admin',
             name: 'admin',
             component: AdminDashboard,

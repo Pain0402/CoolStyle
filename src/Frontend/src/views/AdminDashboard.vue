@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { getOrders, updateOrderStatus } from '../services/order';
-import { Package } from 'lucide-vue-next';
+import apiClient from '../utils/api';
+import DashboardChart from '../components/DashboardChart.vue';
+import { Package, DollarSign, ShoppingCart, TrendingUp } from 'lucide-vue-next';
 import { useToast } from 'vue-toastification';
 
 interface Order {
@@ -15,7 +17,19 @@ interface Order {
 
 const toast = useToast();
 const orders = ref<Order[]>([]);
+const dashboardData = ref<any>(null);
 const loading = ref(true);
+
+const fetchDashboardStats = async () => {
+    try {
+        const stats: any = await apiClient.get('/admin/dashboard/revenue');
+        dashboardData.value = stats;
+        orders.value = stats.recentOrders || [];
+    } catch(err) {
+        console.error("Lỗi fetch dashboard:", err);
+        // Fallback or handle later
+    }
+}
 
 const fetchOrders = async () => {
     loading.value = true;
@@ -59,8 +73,9 @@ const statusMap: Record<string, { label: string, color: string, value: number }>
     'Cancelled': { label: 'Đã hủy', color: 'bg-red-100 text-red-800', value: 4 },
 };
 
-onMounted(() => {
-    fetchOrders();
+onMounted(async () => {
+    await fetchDashboardStats();
+    loading.value = false;
 });
 </script>
 
@@ -83,13 +98,63 @@ onMounted(() => {
 
       <!-- Main Content -->
       <main class="flex-1 p-8 overflow-y-auto">
-          <h1 class="text-2xl font-bold mb-6">Quản lý đơn hàng</h1>
-
-          <div v-if="loading" class="space-y-4">
-              <div v-for="i in 5" :key="i" class="h-16 bg-white rounded-lg shadow-sm animate-pulse"></div>
+          <div class="flex justify-between items-center mb-8">
+              <h1 class="text-2xl font-bold">Tổng quan Dashboard</h1>
+              <div class="bg-white px-4 py-2 rounded-lg shadow-sm font-medium text-sm text-gray-500 border border-gray-100 flex items-center gap-2">
+                  <TrendingUp :size="16" class="text-cyan-500" />
+                  Báo cáo 7 Ngày
+              </div>
           </div>
 
-          <div v-else class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div v-if="loading" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div class="h-32 bg-white rounded-xl shadow-sm animate-pulse border border-gray-100"></div>
+                  <div class="h-32 bg-white rounded-xl shadow-sm animate-pulse border border-gray-100"></div>
+                  <div class="h-32 bg-white rounded-xl shadow-sm animate-pulse border border-gray-100"></div>
+              </div>
+              <div v-for="i in 5" :key="i" class="h-16 bg-white rounded-lg shadow-sm animate-pulse border border-gray-100"></div>
+          </div>
+
+          <div v-else>
+              <!-- Stats -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
+                      <div class="w-12 h-12 rounded-full bg-cyan-100/50 flex items-center justify-center text-cyan-600">
+                          <DollarSign :size="24" />
+                      </div>
+                      <div>
+                          <div class="text-sm font-medium text-gray-500 mb-1">Tổng doanh thu</div>
+                          <div class="text-2xl font-bold">{{ formatCurrency(dashboardData?.totalRevenue || 0) }}</div>
+                      </div>
+                  </div>
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
+                      <div class="w-12 h-12 rounded-full bg-blue-100/50 flex items-center justify-center text-blue-600">
+                          <ShoppingCart :size="24" />
+                      </div>
+                      <div>
+                          <div class="text-sm font-medium text-gray-500 mb-1">Tổng đơn hàng</div>
+                          <div class="text-2xl font-bold">{{ dashboardData?.totalOrders || 0 }} Đơn</div>
+                      </div>
+                  </div>
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
+                      <div class="w-12 h-12 rounded-full bg-indigo-100/50 flex items-center justify-center text-indigo-600">
+                           <TrendingUp :size="24" />
+                      </div>
+                      <div>
+                          <div class="text-sm font-medium text-gray-500 mb-1">Tỉ lệ tăng trưởng</div>
+                          <div class="text-2xl font-bold text-green-500">+12%</div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Chart -->
+              <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-8" v-if="dashboardData?.chartData">
+                  <h3 class="font-bold mb-4 text-gray-800">Biểu đồ doanh thu (7 ngày)</h3>
+                  <DashboardChart :chart-data="dashboardData.chartData" />
+              </div>
+
+              <h2 class="text-xl font-bold mb-4">Đơn hàng gần đây</h2>
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <table class="w-full text-left">
                   <thead class="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase font-semibold">
                       <tr>
@@ -135,6 +200,7 @@ onMounted(() => {
               <div v-if="orders.length === 0" class="p-12 text-center text-gray-500">
                   Chưa có đơn hàng nào.
               </div>
+          </div>
           </div>
       </main>
   </div>

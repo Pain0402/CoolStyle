@@ -3,6 +3,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
+import ProductReviews from '../components/ProductReviews.vue';
 import apiClient from '../utils/api';
 import { useCartStore } from '../stores/cart';
 import { useWishlistStore } from '../stores/wishlist';
@@ -301,6 +302,11 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
             </div>
         </div>
         
+        <!-- Reviews Section -->
+        <div class="container mx-auto px-6 mt-16">
+            <ProductReviews :product-id="product.id" />
+        </div>
+
         <!-- Related Products -->
         <div class="container mx-auto px-6 mt-20">
             <h2 class="text-2xl font-display font-bold text-white mb-8 border-l-4 border-cyan-400 pl-4">Bạn có thể thích</h2>
