@@ -63,4 +63,35 @@ public class ProductsController : ControllerBase
         var products = await _productService.SearchProductsAsync(q);
         return Ok(ApiResponse<object>.Success(products));
     }
+
+    /// <summary>
+    /// Get product reviews.
+    /// </summary>
+    /// <param name="id">Product ID</param>
+    /// <returns>List of ReviewDto</returns>
+    [HttpGet("{id}/reviews")]
+    public async Task<IActionResult> GetProductReviews(int id)
+    {
+        var reviews = await _productService.GetProductReviewsAsync(id);
+        return Ok(ApiResponse<object>.Success(reviews));
+    }
+
+    /// <summary>
+    /// Add a product review.
+    /// </summary>
+    /// <param name="id">Product ID</param>
+    /// <param name="dto">Review details (rating and comment)</param>
+    /// <returns>ReviewDto</returns>
+    [HttpPost("{id}/reviews")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    public async Task<IActionResult> AddProductReview(int id, [FromBody] FashionEcommerce.Application.DTOs.CreateReviewDto dto)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        var review = await _productService.AddProductReviewAsync(id, userId, dto);
+        if (review == null) return NotFound(ApiResponse<object>.Error("Product not found", "NOT_FOUND"));
+
+        return Ok(ApiResponse<object>.Success(review));
+    }
 }

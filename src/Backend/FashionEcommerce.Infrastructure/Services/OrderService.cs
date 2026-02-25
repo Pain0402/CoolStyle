@@ -55,6 +55,8 @@ public class OrderService : IOrderService
             Note = request.Note,
             TotalAmount = totalAmount,
             Status = OrderStatus.Pending,
+            PaymentMethod = request.PaymentMethod,
+            PaymentStatus = PaymentStatus.Pending,
             Items = orderItems
         };
 
@@ -97,6 +99,8 @@ public class OrderService : IOrderService
             CustomerEmail = order.CustomerEmail,
             TotalAmount = order.TotalAmount,
             Status = order.Status.ToString(),
+            PaymentMethod = order.PaymentMethod.ToString(),
+            PaymentStatus = order.PaymentStatus.ToString(),
             CreatedAt = order.CreatedAt,
             Items = order.Items.Select(i => new OrderItemDto
             {

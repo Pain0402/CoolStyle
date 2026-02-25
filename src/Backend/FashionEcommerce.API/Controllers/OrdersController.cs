@@ -80,4 +80,41 @@ public class OrdersController : ControllerBase
             return NotFound(ApiResponse<object>.Fail(null, ex.Message));
         }
     }
+
+    /// <summary>
+    /// [Mock] Get Payment URL for VNPAY.
+    /// </summary>
+    [HttpGet("{id}/pay")]
+    public async Task<IActionResult> GetPaymentUrl(int id)
+    {
+        // Mocking VNPAY URL generation
+        var returnUrl = $"{Request.Scheme}://{Request.Host}/api/orders/vnpay-return?vnp_TxnRef={id}&vnp_ResponseCode=00";
+        var mockVnPayUrl = $"https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_TxnRef={id}&vnp_ReturnUrl={Uri.EscapeDataString(returnUrl)}";
+
+        return Ok(ApiResponse<string>.Success(mockVnPayUrl, "Payment URL generated"));
+    }
+
+    /// <summary>
+    /// [Mock] VNPAY IPN Webhook.
+    /// </summary>
+    [HttpGet("vnpay-return")]
+    public async Task<IActionResult> VnPayReturn([FromQuery] string vnp_TxnRef, [FromQuery] string vnp_ResponseCode)
+    {
+        if (int.TryParse(vnp_TxnRef, out int orderId))
+        {
+            var request = new UpdateOrderStatusRequest 
+            { 
+                Status = vnp_ResponseCode == "00" ? FashionEcommerce.Domain.Entities.OrderStatus.Confirmed : FashionEcommerce.Domain.Entities.OrderStatus.Cancelled 
+            };
+            
+            // Note: Should inject ApplicationDbContext to update PaymentStatus directly, but for now we update OrderStatus using the service. 
+            // Better to trigger a payment success handler in OrderService
+            await _orderService.UpdateOrderStatusAsync(orderId, request);
+            
+            // Redirect to frontend order success page
+            return Redirect($"http://localhost:5173/checkout/success?orderId={orderId}");
+        }
+
+        return BadRequest("Invalid transaction");
+    }
 }

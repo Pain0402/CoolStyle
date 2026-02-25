@@ -11,6 +11,21 @@ public enum OrderStatus
     Cancelled
 }
 
+public enum PaymentMethod
+{
+    COD,
+    VNPAY,
+    MOMO
+}
+
+public enum PaymentStatus
+{
+    Pending,
+    Paid,
+    Failed,
+    Refunded
+}
+
 public class Order : BaseEntity
 {
     public string? UserId { get; set; } // Nullable for Guest Checkout
@@ -24,6 +39,11 @@ public class Order : BaseEntity
 
     public decimal TotalAmount { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
+    // Payment fields
+    public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.COD;
+    public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+    public string? TransactionId { get; set; }
 
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 }

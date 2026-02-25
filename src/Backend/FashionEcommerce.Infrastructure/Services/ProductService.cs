@@ -98,4 +98,53 @@ public class ProductService : IProductService
             VariantCount = 0 // Optimization: don't load variants for search suggestions
         }).ToList();
     }
+
+    public async Task<List<ReviewDto>> GetProductReviewsAsync(int productId)
+    {
+        var reviews = await _context.ProductReviews
+            .Include(r => r.User)
+            .Where(r => r.ProductId == productId)
+            .OrderByDescending(r => r.CreatedAt)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return reviews.Select(r => new ReviewDto
+        {
+            Id = r.Id,
+            UserName = r.User.FullName,
+            UserAvatar = r.User.AvatarUrl,
+            Rating = r.Rating,
+            Comment = r.Comment,
+            CreatedAt = r.CreatedAt
+        }).ToList();
+    }
+
+    public async Task<ReviewDto?> AddProductReviewAsync(int productId, string userId, CreateReviewDto dto)
+    {
+        var productExists = await _context.Products.AnyAsync(p => p.Id == productId);
+        if (!productExists) return null;
+
+        var review = new FashionEcommerce.Domain.Entities.ProductReview
+        {
+            ProductId = productId,
+            UserId = userId,
+            Rating = dto.Rating,
+            Comment = dto.Comment
+        };
+
+        _context.ProductReviews.Add(review);
+        await _context.SaveChangesAsync();
+
+        var user = await _context.Users.FindAsync(userId);
+
+        return new ReviewDto
+        {
+            Id = review.Id,
+            UserName = user?.FullName ?? "Unknown",
+            UserAvatar = user?.AvatarUrl,
+            Rating = review.Rating,
+            Comment = review.Comment,
+            CreatedAt = review.CreatedAt
+        };
+    }
 }
