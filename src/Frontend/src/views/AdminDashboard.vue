@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { getOrders, updateOrderStatus } from '../services/order';
 import apiClient from '../utils/api';
 import DashboardChart from '../components/DashboardChart.vue';
+import MainLayout from '../layouts/MainLayout.vue';
 import { Package, DollarSign, ShoppingCart, TrendingUp } from 'lucide-vue-next';
 import { useToast } from 'vue-toastification';
 
@@ -66,11 +67,11 @@ const formatDate = (dateString: string) => {
 };
 
 const statusMap: Record<string, { label: string, color: string, value: number }> = {
-    'Pending': { label: 'Chờ xử lý', color: 'bg-yellow-100 text-yellow-800', value: 0 },
-    'Confirmed': { label: 'Đã xác nhận', color: 'bg-blue-100 text-blue-800', value: 1 },
-    'Shipped': { label: 'Đang giao', color: 'bg-indigo-100 text-indigo-800', value: 2 },
-    'Delivered': { label: 'Đã giao', color: 'bg-green-100 text-green-800', value: 3 },
-    'Cancelled': { label: 'Đã hủy', color: 'bg-red-100 text-red-800', value: 4 },
+    'Pending': { label: 'Chờ xử lý', color: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20', value: 0 },
+    'Confirmed': { label: 'Đã xác nhận', color: 'bg-blue-500/10 text-cyan-400 border border-blue-500/20', value: 1 },
+    'Shipped': { label: 'Đang giao', color: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20', value: 2 },
+    'Delivered': { label: 'Đã giao', color: 'bg-green-500/10 text-green-400 border border-green-500/20', value: 3 },
+    'Cancelled': { label: 'Đã hủy', color: 'bg-red-500/10 text-red-500 border border-red-500/20', value: 4 },
 };
 
 onMounted(async () => {
@@ -80,128 +81,138 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex">
+  <MainLayout>
+  <div class="min-h-screen bg-[#050505] text-white flex pt-20">
       <!-- Sidebar -->
-      <aside class="w-64 bg-white border-r border-gray-200 hidden md:block">
-          <div class="h-16 flex items-center px-6 border-b border-gray-200">
-              <span class="font-bold text-xl tracking-tight">COOLSTYLE ADMIN</span>
+      <aside class="w-64 bg-white/5 border-r border-white/10 hidden md:block backdrop-blur-md">
+          <div class="h-16 flex items-center px-6 border-b border-white/10">
+              <span class="font-display font-bold text-xl tracking-tight text-cyan-400 drop-shadow-[0_0_8px_rgba(0,242,234,0.5)]">ADMIN PANEL</span>
           </div>
-          <nav class="p-4 space-y-1">
-              <a href="#" class="flex items-center gap-3 px-4 py-3 bg-gray-100 text-black font-medium rounded-lg">
+          <nav class="p-4 space-y-2 mt-4">
+              <a href="#" class="flex items-center gap-3 px-4 py-3 bg-cyan-400/10 text-cyan-400 font-bold rounded-xl border border-cyan-400/20 shadow-[0_0_10px_rgba(0,242,234,0.1)]">
                   <Package :size="20" /> Đơn hàng
               </a>
-              <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg">
+              <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-white/5 hover:text-white transition rounded-xl">
                   <Package :size="20" /> Sản phẩm (Sắp ra mắt)
               </a>
           </nav>
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-8 overflow-y-auto">
+      <main class="flex-1 p-8 overflow-y-auto w-full">
           <div class="flex justify-between items-center mb-8">
-              <h1 class="text-2xl font-bold">Tổng quan Dashboard</h1>
-              <div class="bg-white px-4 py-2 rounded-lg shadow-sm font-medium text-sm text-gray-500 border border-gray-100 flex items-center gap-2">
-                  <TrendingUp :size="16" class="text-cyan-500" />
+              <h1 class="font-display text-3xl font-bold">Tổng quan Dashboard</h1>
+              <div class="bg-white/5 px-4 py-2 rounded-xl border border-white/10 flex items-center gap-2 text-sm font-bold text-gray-300 backdrop-blur">
+                  <TrendingUp :size="16" class="text-cyan-400" />
                   Báo cáo 7 Ngày
               </div>
           </div>
 
           <div v-if="loading" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div class="h-32 bg-white rounded-xl shadow-sm animate-pulse border border-gray-100"></div>
-                  <div class="h-32 bg-white rounded-xl shadow-sm animate-pulse border border-gray-100"></div>
-                  <div class="h-32 bg-white rounded-xl shadow-sm animate-pulse border border-gray-100"></div>
+                  <div class="h-32 bg-white/5 rounded-2xl animate-pulse border border-white/10"></div>
+                  <div class="h-32 bg-white/5 rounded-2xl animate-pulse border border-white/10"></div>
+                  <div class="h-32 bg-white/5 rounded-2xl animate-pulse border border-white/10"></div>
               </div>
-              <div v-for="i in 5" :key="i" class="h-16 bg-white rounded-lg shadow-sm animate-pulse border border-gray-100"></div>
+              <div v-for="i in 5" :key="i" class="h-16 bg-white/5 rounded-xl animate-pulse border border-white/10"></div>
           </div>
 
           <div v-else>
               <!-- Stats -->
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
-                      <div class="w-12 h-12 rounded-full bg-cyan-100/50 flex items-center justify-center text-cyan-600">
-                          <DollarSign :size="24" />
+                  <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-5 backdrop-blur-md relative overflow-hidden group hover:border-cyan-400/30 transition duration-300">
+                      <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyan-400/10 rounded-full blur-2xl group-hover:bg-cyan-400/20 transition duration-500"></div>
+                      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 flex items-center justify-center text-cyan-400 border border-cyan-400/20">
+                          <DollarSign :size="28" />
                       </div>
-                      <div>
-                          <div class="text-sm font-medium text-gray-500 mb-1">Tổng doanh thu</div>
-                          <div class="text-2xl font-bold">{{ formatCurrency(dashboardData?.totalRevenue || 0) }}</div>
-                      </div>
-                  </div>
-                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
-                      <div class="w-12 h-12 rounded-full bg-blue-100/50 flex items-center justify-center text-blue-600">
-                          <ShoppingCart :size="24" />
-                      </div>
-                      <div>
-                          <div class="text-sm font-medium text-gray-500 mb-1">Tổng đơn hàng</div>
-                          <div class="text-2xl font-bold">{{ dashboardData?.totalOrders || 0 }} Đơn</div>
+                      <div class="z-10">
+                          <div class="text-sm font-bold text-gray-400 mb-1">Tổng doanh thu</div>
+                          <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">{{ formatCurrency(dashboardData?.totalRevenue || 0) }}</div>
                       </div>
                   </div>
-                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
-                      <div class="w-12 h-12 rounded-full bg-indigo-100/50 flex items-center justify-center text-indigo-600">
-                           <TrendingUp :size="24" />
+                  <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-5 backdrop-blur-md relative overflow-hidden group hover:border-purple-400/30 transition duration-300">
+                      <div class="absolute -right-10 -top-10 w-32 h-32 bg-purple-400/10 rounded-full blur-2xl group-hover:bg-purple-400/20 transition duration-500"></div>
+                      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400/20 to-pink-500/20 flex items-center justify-center text-purple-400 border border-purple-400/20">
+                          <ShoppingCart :size="28" />
                       </div>
-                      <div>
-                          <div class="text-sm font-medium text-gray-500 mb-1">Tỉ lệ tăng trưởng</div>
-                          <div class="text-2xl font-bold text-green-500">+12%</div>
+                      <div class="z-10">
+                          <div class="text-sm font-bold text-gray-400 mb-1">Tổng đơn hàng</div>
+                          <div class="text-3xl font-bold text-white">{{ dashboardData?.totalOrders || 0 }} Đơn</div>
+                      </div>
+                  </div>
+                  <div class="bg-white/5 p-6 rounded-2xl border border-white/10 flex items-center gap-5 backdrop-blur-md relative overflow-hidden group hover:border-green-400/30 transition duration-300">
+                      <div class="absolute -right-10 -top-10 w-32 h-32 bg-green-400/10 rounded-full blur-2xl group-hover:bg-green-400/20 transition duration-500"></div>
+                      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400/20 to-emerald-500/20 flex items-center justify-center text-green-400 border border-green-400/20">
+                           <TrendingUp :size="28" />
+                      </div>
+                      <div class="z-10">
+                          <div class="text-sm font-bold text-gray-400 mb-1">Tỉ lệ tăng trưởng</div>
+                          <div class="text-3xl font-bold text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]">+12%</div>
                       </div>
                   </div>
               </div>
 
               <!-- Chart -->
-              <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-8" v-if="dashboardData?.chartData">
-                  <h3 class="font-bold mb-4 text-gray-800">Biểu đồ doanh thu (7 ngày)</h3>
+              <div class="bg-white/5 p-8 rounded-3xl border border-white/10 mb-8 backdrop-blur" v-if="dashboardData?.chartData">
+                  <h3 class="font-display font-bold text-xl mb-6 flex items-center gap-2">
+                       <span class="w-2 h-6 bg-cyan-400 rounded-full block"></span> Biểu đồ doanh thu (7 ngày)
+                  </h3>
                   <DashboardChart :chart-data="dashboardData.chartData" />
               </div>
 
-              <h2 class="text-xl font-bold mb-4">Đơn hàng gần đây</h2>
-              <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <h2 class="font-display text-2xl font-bold mb-6 flex items-center gap-2">
+                  <span class="w-2 h-6 bg-purple-400 rounded-full block"></span> Đơn hàng gần đây
+              </h2>
+              <div class="bg-white/5 rounded-3xl border border-white/10 overflow-hidden backdrop-blur">
               <table class="w-full text-left">
-                  <thead class="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase font-semibold">
+                  <thead class="bg-black/40 border-b border-white/5 text-gray-400 text-xs uppercase font-bold tracking-wider">
                       <tr>
-                          <th class="px-6 py-4">Mã đơn</th>
-                          <th class="px-6 py-4">Khách hàng</th>
-                          <th class="px-6 py-4">Tổng tiền</th>
-                          <th class="px-6 py-4">Ngày đặt</th>
-                          <th class="px-6 py-4">Trạng thái</th>
-                          <th class="px-6 py-4">Hành động</th>
+                          <th class="px-6 py-5">Mã đơn</th>
+                          <th class="px-6 py-5">Khách hàng</th>
+                          <th class="px-6 py-5">Tổng tiền</th>
+                          <th class="px-6 py-5">Ngày đặt</th>
+                          <th class="px-6 py-5">Trạng thái</th>
+                          <th class="px-6 py-5">Hành động</th>
                       </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-100">
-                      <tr v-for="order in orders" :key="order.id" class="hover:bg-gray-50 transition">
-                          <td class="px-6 py-4 font-medium">#{{ order.id }}</td>
-                          <td class="px-6 py-4">
-                              <div class="font-medium text-gray-900">{{ order.customerName }}</div>
-                              <div class="text-xs text-gray-500">{{ order.customerEmail }}</div>
+                  <tbody class="divide-y divide-white/5 text-sm">
+                      <tr v-for="order in orders" :key="order.id" class="hover:bg-white/5 transition duration-200">
+                          <td class="px-6 py-5 font-bold text-cyan-400">#{{ order.id }}</td>
+                          <td class="px-6 py-5">
+                              <div class="font-bold text-white">{{ order.customerName }}</div>
+                              <div class="text-xs text-gray-400 mt-1">{{ order.customerEmail }}</div>
                           </td>
-                          <td class="px-6 py-4 font-bold">{{ formatCurrency(order.totalAmount) }}</td>
-                          <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(order.createdAt) }}</td>
-                          <td class="px-6 py-4">
-                              <span :class="['px-2.5 py-0.5 rounded-full text-xs font-medium', statusMap[order.status]?.color]">
+                          <td class="px-6 py-5 font-bold">{{ formatCurrency(order.totalAmount) }}</td>
+                          <td class="px-6 py-5 text-gray-400">{{ formatDate(order.createdAt) }}</td>
+                          <td class="px-6 py-5">
+                              <span :class="['px-3 py-1 rounded-full text-xs font-bold inline-block', statusMap[order.status]?.color]">
                                   {{ statusMap[order.status]?.label || order.status }}
                               </span>
                           </td>
-                          <td class="px-6 py-4">
+                          <td class="px-6 py-5">
                               <select 
                                 :value="statusMap[order.status]?.value" 
                                 @change="handleStatusChange(order.id, parseInt(($event.target as HTMLSelectElement).value))"
-                                class="border-gray-300 text-sm rounded-md shadow-sm focus:border-black focus:ring-black"
+                                class="bg-black/60 text-white border border-white/20 text-sm rounded-lg px-3 py-2 outline-none focus:border-cyan-400 transition cursor-pointer hover:bg-white/5"
                               >
-                                  <option :value="0">Chờ xử lý</option>
-                                  <option :value="1">Xác nhận</option>
-                                  <option :value="2">Giao hàng</option>
-                                  <option :value="3">Hoàn tất</option>
-                                  <option :value="4">Hủy đơn</option>
+                                  <option class="bg-black" :value="0">Chờ xử lý</option>
+                                  <option class="bg-black" :value="1">Xác nhận</option>
+                                  <option class="bg-black" :value="2">Giao hàng</option>
+                                  <option class="bg-black" :value="3">Hoàn tất</option>
+                                  <option class="bg-black" :value="4">Hủy đơn</option>
                               </select>
                           </td>
                       </tr>
                   </tbody>
               </table>
               
-              <div v-if="orders.length === 0" class="p-12 text-center text-gray-500">
-                  Chưa có đơn hàng nào.
+              <div v-if="orders.length === 0" class="p-16 text-center text-gray-400">
+                  <Package :size="48" class="mx-auto text-gray-600 mb-4" />
+                  Chưa có đơn hàng nào cập bến.
               </div>
           </div>
           </div>
       </main>
   </div>
+  </MainLayout>
 </template>

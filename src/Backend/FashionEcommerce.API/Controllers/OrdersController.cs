@@ -87,9 +87,10 @@ public class OrdersController : ControllerBase
     [HttpGet("{id}/pay")]
     public async Task<IActionResult> GetPaymentUrl(int id)
     {
-        // Mocking VNPAY URL generation
+        // Mocking VNPAY URL generation: Instead of actual Sandbox which requires complex hashing, just redirect to our return endpoint
         var returnUrl = $"{Request.Scheme}://{Request.Host}/api/orders/vnpay-return?vnp_TxnRef={id}&vnp_ResponseCode=00";
-        var mockVnPayUrl = $"https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_TxnRef={id}&vnp_ReturnUrl={Uri.EscapeDataString(returnUrl)}";
+        // Just return our return point directly to simulate a successful payment flow
+        var mockVnPayUrl = returnUrl;
 
         return Ok(ApiResponse<string>.Success(mockVnPayUrl, "Payment URL generated"));
     }

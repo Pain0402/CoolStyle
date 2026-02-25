@@ -32,9 +32,15 @@ const chartOptions = {
         }
     },
     scales: {
+        x: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#9ca3af' }
+        },
         y: {
             beginAtZero: true,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
             ticks: {
+                color: '#9ca3af',
                 callback: function(value: any) {
                     return new Intl.NumberFormat('vi-VN', { notation: "compact", compactDisplay: "short" }).format(value);
                 }
@@ -61,15 +67,14 @@ const formattedData = ref({
 
 onMounted(() => {
     if (props.chartData && props.chartData.length > 0) {
-        // Prepare chart data
-        const sortedData = [...props.chartData].sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime());
+        const sortedData = [...props.chartData].sort((a, b) => new Date(a.date || a.Date).getTime() - new Date(b.date || b.Date).getTime());
         
         formattedData.value.labels = sortedData.map(item => {
-            const date = new Date(item.Date);
+            const date = new Date(item.date || item.Date);
             return `${date.getDate()}/${date.getMonth() + 1}`;
         });
         
-        formattedData.value.datasets[0].data = sortedData.map(item => item.Revenue);
+        formattedData.value.datasets[0].data = sortedData.map(item => item.revenue || item.Revenue);
     }
 });
 

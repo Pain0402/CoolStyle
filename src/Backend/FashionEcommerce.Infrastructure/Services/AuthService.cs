@@ -51,7 +51,8 @@ public class AuthService : IAuthService
             Token = token,
             Email = user.Email,
             FullName = user.FullName,
-            AvatarUrl = user.AvatarUrl
+            AvatarUrl = user.AvatarUrl,
+            Role = user.Email != null && user.Email.Contains("admin") ? "Admin" : "User"
         };
     }
 
@@ -76,7 +77,8 @@ public class AuthService : IAuthService
             Token = token,
             Email = user.Email!,
             FullName = user.FullName,
-            AvatarUrl = user.AvatarUrl
+            AvatarUrl = user.AvatarUrl,
+            Role = user.Email!.Contains("admin") ? "Admin" : "User"
         };
     }
 

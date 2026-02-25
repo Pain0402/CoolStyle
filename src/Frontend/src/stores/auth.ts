@@ -6,6 +6,7 @@ export interface User {
     email: string;
     fullName: string;
     avatarUrl?: string;
+    role?: string;
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -40,13 +41,13 @@ export const useAuthStore = defineStore('auth', () => {
     const register = async (payload: any) => {
         const response: any = await apiClient.post('/auth/register', payload);
         // Explicitly cast or access properties known to exist in response
-        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl });
+        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl, role: response.role });
         return true;
     };
 
     const login = async (payload: any) => {
         const response: any = await apiClient.post('/auth/login', payload);
-        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl });
+        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl, role: response.role });
         return true;
     };
 
