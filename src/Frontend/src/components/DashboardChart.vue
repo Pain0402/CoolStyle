@@ -74,7 +74,12 @@ onMounted(() => {
             return `${date.getDate()}/${date.getMonth() + 1}`;
         });
         
-        formattedData.value.datasets[0].data = sortedData.map(item => item.revenue || item.Revenue);
+        if (formattedData.value.datasets && formattedData.value.datasets.length > 0) {
+            const firstDataset = formattedData.value.datasets[0];
+            if (firstDataset) {
+                firstDataset.data = sortedData.map(item => item.revenue || item.Revenue);
+            }
+        }
     }
 });
 

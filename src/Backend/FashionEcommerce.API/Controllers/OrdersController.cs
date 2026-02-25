@@ -13,10 +13,12 @@ namespace FashionEcommerce.API.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
+    private readonly IConfiguration _configuration;
 
-    public OrdersController(IOrderService orderService)
+    public OrdersController(IOrderService orderService, IConfiguration configuration)
     {
         _orderService = orderService;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -112,8 +114,9 @@ public class OrdersController : ControllerBase
             // Better to trigger a payment success handler in OrderService
             await _orderService.UpdateOrderStatusAsync(orderId, request);
             
-            // Redirect to frontend order success page
-            return Redirect($"http://localhost:5173/checkout/success?orderId={orderId}");
+            // Get FrontendUrl from configuration
+            string frontendUrl = _configuration["FrontendUrl"] ?? "http://localhost:5173";
+            return Redirect($"{frontendUrl.TrimEnd('/')}/checkout/success?orderId={orderId}");
         }
 
         return BadRequest("Invalid transaction");
