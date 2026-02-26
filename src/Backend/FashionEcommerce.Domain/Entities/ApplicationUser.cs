@@ -11,4 +11,5 @@ public class ApplicationUser : IdentityUser
     public ICollection<Address> Addresses { get; set; } = new List<Address>();
     public ICollection<WishlistItem> Wishlist { get; set; } = new List<WishlistItem>();
     public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

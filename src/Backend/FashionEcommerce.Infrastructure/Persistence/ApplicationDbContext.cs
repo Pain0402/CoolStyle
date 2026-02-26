@@ -19,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Address> Addresses { get; set; }
     public DbSet<WishlistItem> WishlistItems { get; set; }
     public DbSet<ProductReview> ProductReviews { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
