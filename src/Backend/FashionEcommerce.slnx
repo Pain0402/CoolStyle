@@ -3,4 +3,5 @@
   <Project Path="FashionEcommerce.Application/FashionEcommerce.Application.csproj" />
   <Project Path="FashionEcommerce.Domain/FashionEcommerce.Domain.csproj" />
   <Project Path="FashionEcommerce.Infrastructure/FashionEcommerce.Infrastructure.csproj" />
+  <Project Path="FashionEcommerce.Tests/FashionEcommerce.Tests.csproj" />
 </Solution>
