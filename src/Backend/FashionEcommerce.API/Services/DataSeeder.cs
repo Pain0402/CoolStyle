@@ -4,6 +4,7 @@ using Serilog;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
 
 namespace FashionEcommerce.API.Services;
 
@@ -15,6 +16,8 @@ public static class DataSeeder
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         // Ensure database is valid or created
         if (!context.Database.CanConnect()) 
@@ -22,6 +25,12 @@ public static class DataSeeder
              Log.Warning("DataSeeder: Cannot connect to Database.");
              return;
         }
+
+        // Seed Roles
+        await SeedRolesAsync(roleManager);
+
+        // Seed Admin User
+        await SeedAdminUserAsync(userManager);
 
         // Only seed if we have very little data (e.g. failed previous seed)
         if (await context.Products.CountAsync() > 5)
@@ -274,5 +283,58 @@ public static class DataSeeder
     {
         // This helper is unused now but kept for compatibility or removed
         return new Product(); 
+    }
+
+    private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+    {
+        string[] roles = { "Admin", "User" };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+                Log.Information("DataSeeder: Created role '{Role}'", role);
+            }
+        }
+    }
+
+    private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
+    {
+        const string adminEmail = "admin@coolstyle.com";
+        const string adminPassword = "Admin@123456";
+
+        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+        if (existingAdmin != null)
+        {
+            // Ensure admin has Admin role even if user already exists
+            if (!await userManager.IsInRoleAsync(existingAdmin, "Admin"))
+            {
+                await userManager.AddToRoleAsync(existingAdmin, "Admin");
+                Log.Information("DataSeeder: Assigned Admin role to existing admin user.");
+            }
+            return;
+        }
+
+        var admin = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FullName = "System Administrator",
+            AvatarUrl = $"https://api.dicebear.com/9.x/lorelei/svg?seed={adminEmail}",
+            EmailConfirmed = true,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var result = await userManager.CreateAsync(admin, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(admin, "Admin");
+            Log.Information("DataSeeder: Admin user created → {Email}", adminEmail);
+        }
+        else
+        {
+            Log.Error("DataSeeder: Failed to create admin user: {Errors}",
+                string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
     }
 }

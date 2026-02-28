@@ -9,7 +9,7 @@ namespace FashionEcommerce.API.Controllers;
 [ApiController]
 [Route("api/admin/dashboard")]
 [Produces("application/json")]
-// [Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin")]
 public class DashboardController : ControllerBase
 {
     private readonly ApplicationDbContext _context;

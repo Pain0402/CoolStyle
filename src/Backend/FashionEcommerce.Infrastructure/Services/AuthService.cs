@@ -56,7 +56,6 @@ public class AuthService : IAuthService
 
         return await BuildAuthResponseAsync(user);
     }
-
     public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
     {
         var token = await _context.RefreshTokens
@@ -89,7 +88,10 @@ public class AuthService : IAuthService
 
     private async Task<AuthResponseDto> BuildAuthResponseAsync(ApplicationUser user)
     {
-        var accessToken = GenerateJwtToken(user);
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.Contains("Admin") ? "Admin" : "User";
+
+        var accessToken = GenerateJwtToken(user, roles);
         var refreshToken = await CreateRefreshTokenAsync(user.Id);
 
         return new AuthResponseDto
@@ -99,7 +101,7 @@ public class AuthService : IAuthService
             Email = user.Email!,
             FullName = user.FullName,
             AvatarUrl = user.AvatarUrl,
-            Role = user.Email!.Contains("admin") ? "Admin" : "User"
+            Role = role
         };
     }
 
@@ -119,7 +121,7 @@ public class AuthService : IAuthService
         return refreshToken;
     }
 
-    private string GenerateJwtToken(ApplicationUser user)
+    private string GenerateJwtToken(ApplicationUser user, IList<string>? roles = null)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]!);
@@ -130,6 +132,13 @@ public class AuthService : IAuthService
             new(ClaimTypes.Email, user.Email!),
             new(ClaimTypes.Name, user.FullName)
         };
+
+        // Add role claims so [Authorize(Roles = "Admin")] works
+        if (roles != null)
+        {
+            foreach (var role in roles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

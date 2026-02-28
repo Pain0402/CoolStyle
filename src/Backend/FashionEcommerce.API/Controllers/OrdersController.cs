@@ -48,10 +48,8 @@ public class OrdersController : ControllerBase
     /// <summary>
     /// [Admin] Get all orders.
     /// </summary>
-    /// <response code="200">List of Orders</response>
-    /// <response code="401">Unauthorized</response>
     [HttpGet("admin")]
-    // [Authorize(Roles = "Admin")] // Uncomment when Roles are set up
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<OrderResponse>>), 200)]
     public async Task<IActionResult> GetAllOrders()
     {
@@ -62,12 +60,8 @@ public class OrdersController : ControllerBase
     /// <summary>
     /// [Admin] Update order status.
     /// </summary>
-    /// <param name="id">Order ID</param>
-    /// <param name="request">New Status</param>
-    /// <response code="200">Order Updated Successfully</response>
-    /// <response code="404">Order Not Found</response>
     [HttpPut("admin/{id}/status")]
-    // [Authorize(Roles = "Admin")] // Uncomment when Roles are set up
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse<OrderResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusRequest request)
