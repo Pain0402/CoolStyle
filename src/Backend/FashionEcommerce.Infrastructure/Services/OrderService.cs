@@ -76,6 +76,31 @@ public class OrderService : IOrderService
         return orders.Select(MapToResponse).ToList();
     }
 
+    public async Task<IEnumerable<OrderResponse>> GetUserOrdersAsync(string userId)
+    {
+        var orders = await _context.Orders
+            .Include(o => o.Items)
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        return orders.Select(MapToResponse).ToList();
+    }
+
+    public async Task<OrderResponse?> GetOrderByIdAsync(int orderId, string? userId)
+    {
+        var query = _context.Orders.Include(o => o.Items).AsQueryable();
+
+        // If userId provided, restrict to that user's orders (non-admin access)
+        if (!string.IsNullOrEmpty(userId))
+            query = query.Where(o => o.Id == orderId && o.UserId == userId);
+        else
+            query = query.Where(o => o.Id == orderId);
+
+        var order = await query.FirstOrDefaultAsync();
+        return order == null ? null : MapToResponse(order);
+    }
+
     public async Task<OrderResponse> UpdateOrderStatusAsync(int orderId, UpdateOrderStatusRequest request)
     {
         var order = await _context.Orders

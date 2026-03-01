@@ -21,12 +21,7 @@ public class OrdersController : ControllerBase
         _configuration = configuration;
     }
 
-    /// <summary>
-    /// Create a new order.
-    /// </summary>
-    /// <param name="request">Order Information</param>
-    /// <response code="200">Order Created Successfully</response>
-    /// <response code="400">Validation Error</response>
+    /// <summary>Create a new order.</summary>
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<OrderResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
@@ -34,15 +29,45 @@ public class OrdersController : ControllerBase
     {
         try
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Null if Guest
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _orderService.CreateOrderAsync(request, userId);
-            
             return Ok(ApiResponse<OrderResponse>.Success(result, "Order created successfully"));
         }
         catch (Exception ex)
         {
             return BadRequest(ApiResponse<object>.Fail(null, ex.Message));
         }
+    }
+
+    /// <summary>Get current user's order history.</summary>
+    [HttpGet("my-orders")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<OrderResponse>>), 200)]
+    public async Task<IActionResult> GetMyOrders()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        var result = await _orderService.GetUserOrdersAsync(userId);
+        return Ok(ApiResponse<IEnumerable<OrderResponse>>.Success(result));
+    }
+
+    /// <summary>Get a specific order by ID (user can only see their own).</summary>
+    [HttpGet("{id}")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<OrderResponse>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<object>), 404)]
+    public async Task<IActionResult> GetOrderById(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
+        // Admin can see any order, user can only see their own
+        var result = await _orderService.GetOrderByIdAsync(id, isAdmin ? null : userId);
+        if (result == null)
+            return NotFound(ApiResponse<object>.Fail(null, "Order not found"));
+
+        return Ok(ApiResponse<OrderResponse>.Success(result));
     }
 
     /// <summary>
