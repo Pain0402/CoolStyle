@@ -147,8 +147,35 @@ const setDefaultAddress = async (id: number) => {
     }
 };
 
-const removeFromWishlist = async (productId: number) => {
+// Orders
+const orders = ref<any[]>([]);
+const ordersLoading = ref(false);
+
+const fetchOrders = async () => {
     try {
+        ordersLoading.value = true;
+        const res: any = await apiClient.get('/orders/my-orders');
+        orders.value = res as any[];
+    } catch (e) {
+        console.error(e);
+        toast.error('Không thể tải lịch sử đơn hàng');
+    } finally {
+        ordersLoading.value = false;
+    }
+};
+
+const orderStatusStyle = (status: string) => {
+    const map: Record<string, { label: string; color: string }> = {
+        Pending:   { label: 'Chờ xử lý',   color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+        Confirmed: { label: 'Đã xác nhận', color: 'bg-blue-500/10 text-cyan-400 border-blue-500/20' },
+        Shipped:   { label: 'Đang giao',   color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+        Delivered: { label: 'Đã giao',     color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+        Cancelled: { label: 'Đã hủy',      color: 'bg-red-500/10 text-red-400 border-red-500/20' },
+    };
+    return map[status] ?? { label: status, color: 'bg-white/10 text-gray-400 border-white/10' };
+};
+
+const removeFromWishlist = async (productId: number) => {    try {
         await apiClient.delete(`/wishlist/${productId}`);
         wishlist.value = wishlist.value.filter(w => w.productId !== productId);
         toast.success("Removed from wishlist");
@@ -160,6 +187,7 @@ const removeFromWishlist = async (productId: number) => {
 onMounted(() => {
     if (authStore.isAuthenticated) {
         fetchProfileData();
+        fetchOrders();
     }
 });
 
@@ -323,11 +351,56 @@ const logout = () => {
                         </div>
                     </div>
 
-                    <!-- Orders Tab (Placeholder) -->
+    // Orders Tab (Placeholder) -->
                     <div v-if="activeTab === 'orders'" class="animate-fade-in-up">
-                        <h2 class="text-2xl font-bold mb-6 font-display">Mission Logs</h2>
-                        <div class="text-center py-20 text-gray-500 bg-white/5 rounded-2xl">
-                             No missions recorded yet.
+                        <h2 class="text-2xl font-bold mb-6 font-display">Lịch sử đơn hàng</h2>
+
+                        <div v-if="ordersLoading" class="space-y-4">
+                            <div v-for="i in 3" :key="i" class="h-24 bg-white/5 rounded-xl animate-pulse border border-white/10"></div>
+                        </div>
+
+                        <div v-else-if="orders.length === 0" class="text-center py-20 text-gray-500 bg-white/5 rounded-2xl border border-white/10">
+                            <Package :size="48" class="mx-auto text-gray-600 mb-4" />
+                            <p class="font-bold text-lg text-gray-400">Chưa có đơn hàng nào</p>
+                            <p class="text-sm mt-2">Hãy khám phá cửa hàng và đặt đơn đầu tiên!</p>
+                            <a href="/shop" class="inline-block mt-6 px-6 py-2 bg-cyan-500 text-black font-bold rounded-xl hover:bg-cyan-400 transition">Mua sắm ngay</a>
+                        </div>
+
+                        <div v-else class="space-y-4">
+                            <div v-for="order in orders" :key="order.id"
+                                 class="p-5 rounded-2xl border border-white/10 bg-white/5 hover:border-cyan-500/30 transition group">
+                                <!-- Order Header -->
+                                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-bold text-cyan-400 text-lg">#{{ order.id }}</span>
+                                        <span :class="['px-3 py-1 rounded-full text-xs font-bold border', orderStatusStyle(order.status).color]">
+                                            {{ orderStatusStyle(order.status).label }}
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-400">{{ formatDate(order.createdAt) }}</div>
+                                </div>
+
+                                <!-- Order Items -->
+                                <div class="space-y-2 mb-4">
+                                    <div v-for="item in order.items" :key="item.productId"
+                                         class="flex justify-between items-center text-sm text-gray-300">
+                                        <span>{{ item.productName }} <span class="text-gray-500">× {{ item.quantity }}</span></span>
+                                        <span class="font-bold">{{ formatCurrency(item.unitPrice * item.quantity) }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Order Footer -->
+                                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
+                                    <div class="flex items-center gap-2 text-sm text-gray-400">
+                                        <span>Thanh toán:</span>
+                                        <span class="font-bold text-white">{{ order.paymentMethod }}</span>
+                                        <span :class="['px-2 py-0.5 rounded text-xs font-bold', order.paymentStatus === 'Paid' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400']">
+                                            {{ order.paymentStatus === 'Paid' ? 'Đã thanh toán' : 'Chờ thanh toán' }}
+                                        </span>
+                                    </div>
+                                    <div class="font-bold text-xl text-white">{{ formatCurrency(order.totalAmount) }}</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
