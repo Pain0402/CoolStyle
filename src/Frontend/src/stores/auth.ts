@@ -15,39 +15,58 @@ export const useAuthStore = defineStore('auth', () => {
 
     const isAuthenticated = computed(() => !!token.value);
 
-    // If we have a token on startup, we should try to restore axios header. 
+    // Restore axios header on startup
     if (token.value) {
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${token.value}`;
     }
 
-    const setAuth = (newToken: string, newUser: User) => {
+    const setAuth = (newToken: string, newUser: User, newRefreshToken?: string) => {
         token.value = newToken;
         user.value = newUser;
         localStorage.setItem('token', newToken);
         localStorage.setItem('user', JSON.stringify(newUser));
-
-        // Set axios header
+        if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken);
+        }
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     };
 
-    const logout = () => {
+    const logout = async () => {
+        // Revoke refresh token on server
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+            try {
+                await apiClient.post('/auth/revoke-token', { refreshToken });
+            } catch {
+                // Ignore errors on revoke — still clear local state
+            }
+        }
+
         token.value = null;
         user.value = null;
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         delete apiClient.defaults.headers.common['Authorization'];
     };
 
     const register = async (payload: any) => {
         const response: any = await apiClient.post('/auth/register', payload);
-        // Explicitly cast or access properties known to exist in response
-        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl, role: response.role });
+        setAuth(
+            response.token,
+            { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl, role: response.role },
+            response.refreshToken
+        );
         return true;
     };
 
     const login = async (payload: any) => {
         const response: any = await apiClient.post('/auth/login', payload);
-        setAuth(response.token, { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl, role: response.role });
+        setAuth(
+            response.token,
+            { email: response.email, fullName: response.fullName, avatarUrl: response.avatarUrl, role: response.role },
+            response.refreshToken
+        );
         return true;
     };
 
@@ -56,5 +75,5 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('user', JSON.stringify(user.value));
     };
 
-    return { user, token, isAuthenticated, login, register, logout, updateUser };
+    return { user, token, isAuthenticated, login, register, logout, updateUser, setAuth };
 });
