@@ -114,6 +114,25 @@ const fetchProduct = async () => {
 
 const isWishlisted = computed(() => product.value ? wishlistStore.isInWishlist(product.value.id) : false);
 
+const currentVariant = computed(() =>
+    product.value?.variants?.find((v: any) =>
+        v.colorName === selectedColor.value && v.size === selectedSize.value
+    )
+);
+
+const isOutOfStock = computed(() => {
+    if (!currentVariant.value) return false;
+    return currentVariant.value.stock <= 0;
+});
+
+const stockWarning = computed(() => {
+    if (!currentVariant.value) return null;
+    const stock = currentVariant.value.stock;
+    if (stock <= 0) return 'Hết hàng';
+    if (stock <= 5) return `Chỉ còn ${stock} sản phẩm!`;
+    return null;
+});
+
 const fetchRelated = async (_category: string) => {
     try {
        // Fetch a few products for related section
@@ -128,10 +147,20 @@ const fetchRelated = async (_category: string) => {
 const addToCart = () => {
     if (!product.value) return;
 
-    // Find full variant object
-    const variant = product.value.variants?.find((v: any) => 
+    const variant = product.value.variants?.find((v: any) =>
         v.colorName === selectedColor.value && v.size === selectedSize.value
     );
+
+    // Stock validation
+    if (variant && variant.stock <= 0) {
+        toast.error('Sản phẩm này đã hết hàng!');
+        return;
+    }
+    if (variant && quantity.value > variant.stock) {
+        toast.warning(`Chỉ còn ${variant.stock} sản phẩm trong kho!`);
+        quantity.value = variant.stock;
+        return;
+    }
 
     cartStore.addToCart(product.value, quantity.value, variant);
     toast.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ!`);
@@ -268,9 +297,14 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
                             <button @click="quantity++" class="w-12 h-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white"><Plus :size="16"/></button>
                         </div>
                         
-                        <button @click="addToCart" class="flex-1 h-14 bg-[#00f2ea] text-black font-bold rounded-xl hover:bg-[#00c2bb] shadow-[0_0_20px_rgba(0,242,234,0.3)] transition-all flex items-center justify-center gap-2">
+                        <button @click="addToCart" 
+                                :disabled="isOutOfStock"
+                                :class="['flex-1 h-14 font-bold rounded-xl transition-all flex items-center justify-center gap-2',
+                                         isOutOfStock
+                                           ? 'bg-white/10 text-gray-500 cursor-not-allowed'
+                                           : 'bg-[#00f2ea] text-black hover:bg-[#00c2bb] shadow-[0_0_20px_rgba(0,242,234,0.3)]']">
                             <ShoppingBag :size="20" />
-                            <span>Add to Cart - {{ formatCurrency(currentPrice * quantity) }}</span>
+                            <span>{{ isOutOfStock ? 'Hết hàng' : `Add to Cart - ${formatCurrency(currentPrice * quantity)}` }}</span>
                         </button>
 
                         <button @click="addToWishlist" 
@@ -280,9 +314,14 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
                         </button>
                     </div>
 
+                <!-- Stock Warning -->
+                <div v-if="stockWarning" :class="['mb-4 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2',
+                     isOutOfStock ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20']">
+                    <span>⚠</span> {{ stockWarning }}
+                </div>
+
                 <!-- Features -->
-                <div class="space-y-4 text-sm text-gray-400">
-                    <div class="flex items-center gap-3">
+                <div class="space-y-4 text-sm text-gray-400">                    <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"><Truck :size="16"/></div>
                         <span>Free shipping on orders over 500k</span>
                     </div>
