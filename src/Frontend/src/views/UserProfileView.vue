@@ -12,6 +12,15 @@ const toast = useToast();
 const activeTab = ref('profile'); // profile, orders, addresses, wishlist
 const loading = ref(false);
 
+const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+
+const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+
 const avatarStyles = [
     { name: 'Lorelei', value: 'lorelei' },
     { name: 'Avataaars', value: 'avataaars' },
