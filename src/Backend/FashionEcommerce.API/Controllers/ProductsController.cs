@@ -1,3 +1,4 @@
+using FashionEcommerce.Application.DTOs;
 using FashionEcommerce.Application.Interfaces;
 using FashionEcommerce.API.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -16,20 +17,13 @@ public class ProductsController : ControllerBase
         _productService = productService;
     }
 
-    /// <summary>
-    /// Get a paginated list of products.
-    /// </summary>
-    /// <param name="category">Filter by category slug (e.g., 'ao-thun')</param>
-    /// <returns>List of ProductDto</returns>
-    /// <response code="200">Returns list of products</response>
-    /// <response code="500">Internal Server Error</response>
+    /// <summary>Get paginated list of products with optional filters.</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<object>), 200)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public async Task<IActionResult> GetProducts([FromQuery] string? category)
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<ProductDto>>), 200)]
+    public async Task<IActionResult> GetProducts([FromQuery] ProductQueryParams queryParams)
     {
-        var products = await _productService.GetProductsAsync(category);
-        return Ok(ApiResponse<object>.Success(products));
+        var result = await _productService.GetProductsAsync(queryParams);
+        return Ok(ApiResponse<object>.Success(result));
     }
 
     /// <summary>
