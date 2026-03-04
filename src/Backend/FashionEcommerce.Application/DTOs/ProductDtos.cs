@@ -9,6 +9,8 @@ public class ProductDto
     public string CategoryName { get; set; } = string.Empty;
     public string ThumbnailUrl { get; set; } = string.Empty;
     public int VariantCount { get; set; }
+    public double AverageRating { get; set; }
+    public int ReviewCount { get; set; }
 }
 
 public class ProductDetailDto : ProductDto
