@@ -1,9 +1,13 @@
 using FashionEcommerce.API.Middlewares;
 using FashionEcommerce.API.Services;
+using FashionEcommerce.API.Validators;
+using FashionEcommerce.Application.DTOs;
 using FashionEcommerce.Application.Interfaces;
 using FashionEcommerce.Domain.Entities;
 using FashionEcommerce.Infrastructure.Persistence;
 using FashionEcommerce.Infrastructure.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +26,13 @@ builder.Host.UseSerilog((context, config) =>
 // 2. Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 2b. Redis Distributed Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "FashionEcommerce:";
+});
 
 // 3. Identity & Auth
 // Use AddIdentityCore instead of AddIdentity to avoid Cookie scheme override
@@ -72,6 +83,8 @@ builder.Services.AddScoped<IWishlistService, WishlistService>();
 
 // 4. API Services
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -110,15 +123,24 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
-// CORS for Frontend
-// CORS for Frontend (Allow All for Production fix)
+// CORS — restrict to configured origins in production
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        if (builder.Environment.IsDevelopment())
+        {
+            // Allow any origin in development for convenience
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        }
+        else
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
     });
 });
 

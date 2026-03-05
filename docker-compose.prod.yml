@@ -30,6 +30,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Server=sql;Database=FashionEcommerceDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - ConnectionStrings__Redis=redis:6379
       - Serilog__WriteTo__0__Args__serverUrl=http://seq:5341
       - JwtSettings__Secret=ThisIsASecretKeyForJwtValidationWaitItMustBeLonger32Chars
       - JwtSettings__Issuer=FashionEcommerceAPI
