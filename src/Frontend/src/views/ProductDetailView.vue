@@ -243,9 +243,10 @@ const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN', { style: 
                     <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
                         {{ formatCurrency(currentPrice) }}
                     </div>
-                    <div class="flex items-center gap-1 text-yellow-400 text-sm bg-yellow-400/10 px-2 py-1 rounded">
-                         <Star :size="14" fill="currentColor" /> 4.8 (120 reviews)
+                    <div v-if="product.reviewCount > 0" class="flex items-center gap-1 text-yellow-400 text-sm bg-yellow-400/10 px-2 py-1 rounded">
+                        <Star :size="14" fill="currentColor" /> {{ product.averageRating }} ({{ product.reviewCount }} reviews)
                     </div>
+                    <div v-else class="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded">Chưa có đánh giá</div>
                 </div>
 
                 <!-- Divider -->
