@@ -1,5 +1,6 @@
 # 👕 CoolStyle - Fashion E-commerce Full Stack
 
+[![CI Pipeline](https://github.com/Pain0402/CoolStyle/actions/workflows/ci.yml/badge.svg)](https://github.com/Pain0402/CoolStyle/actions/workflows/ci.yml)
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat&logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![Vue 3](https://img.shields.io/badge/Vue-3.0-4FC08D?style=flat&logo=vue.js)](https://vuejs.org/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4.0-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
