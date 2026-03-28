@@ -89,7 +89,21 @@ apiClient.interceptors.response.use(
         }
 
         // Handle other errors
+        const status = error.response?.status;
         const message = error.response?.data?.message || error.message || 'Something went wrong';
+
+        if (status === 403) {
+            const { useToast } = await import('vue-toastification');
+            useToast().error('Bạn không có quyền thực hiện thao tác này.');
+        } else if (status === 500) {
+            const { useToast } = await import('vue-toastification');
+            useToast().error('Lỗi hệ thống, vui lòng thử lại sau.');
+        } else if (!error.response && !isRefreshing) {
+            // Only show network error once, not for every failed request
+            const { useToast } = await import('vue-toastification');
+            useToast().error('Không thể kết nối đến server.', { timeout: 3000, id: 'network-error' });
+        }
+
         console.error('[API Error]:', message);
         return Promise.reject(error);
     }
