@@ -6,6 +6,7 @@ import apiClient from '../utils/api';
 import { User, Package, MapPin, Heart, LogOut, Plus, Trash2, CheckCircle } from 'lucide-vue-next';
 import { useToast } from 'vue-toastification';
 import ProductCard from '../components/ProductCard.vue';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
 
 const authStore = useAuthStore();
 const toast = useToast();
@@ -365,7 +366,7 @@ const logout = () => {
                         <h2 class="text-2xl font-bold mb-6 font-display">Lịch sử đơn hàng</h2>
 
                         <div v-if="ordersLoading" class="space-y-4">
-                            <div v-for="i in 3" :key="i" class="h-24 bg-white/5 rounded-xl animate-pulse border border-white/10"></div>
+                            <SkeletonLoader type="list-item" :count="3" />
                         </div>
 
                         <div v-else-if="orders.length === 0" class="text-center py-20 text-gray-500 bg-white/5 rounded-2xl border border-white/10">
