@@ -17,8 +17,14 @@ public class AuthServiceTests
     private static Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
     {
         var store = new Mock<IUserStore<ApplicationUser>>();
-        return new Mock<UserManager<ApplicationUser>>(
+        var mock = new Mock<UserManager<ApplicationUser>>(
             store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
+
+        // Default: all users have "User" role — prevents NullReferenceException in BuildAuthResponseAsync
+        mock.Setup(m => m.GetRolesAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(new List<string> { "User" });
+
+        return mock;
     }
 
     private static IConfiguration CreateConfig() =>
@@ -96,6 +102,10 @@ public class AuthServiceTests
         userManager.Setup(m => m.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Success)
             .Callback<ApplicationUser, string>((u, _) => u.Id = adminUser.Id);
+
+        // Admin user returns Admin role
+        userManager.Setup(m => m.GetRolesAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(new List<string> { "Admin" });
 
         var sut = new AuthService(userManager.Object, CreateConfig(), db);
 

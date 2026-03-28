@@ -29,7 +29,7 @@ jobs:
         run: dotnet build src/Backend/FashionEcommerce.slnx --no-restore --configuration Release
 
       - name: Run unit tests
-        run: dotnet test src/Backend/FashionEcommerce.Tests/FashionEcommerce.Tests.csproj --no-build --configuration Release --verbosity normal
+        run: dotnet test src/Backend/FashionEcommerce.Tests/FashionEcommerce.Tests.csproj --configuration Release --verbosity normal
 
   frontend:
     name: Frontend — Build
