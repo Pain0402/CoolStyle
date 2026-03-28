@@ -15,10 +15,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET 8
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Restore dependencies
         run: dotnet restore src/Backend/FashionEcommerce.slnx
@@ -49,7 +51,7 @@ jobs:
         working-directory: src/Frontend
 
       - name: Type check & Build
-        run: npm run build
+        run: npm run build -- --mode production
         working-directory: src/Frontend
         env:
           VITE_API_URL: /api
