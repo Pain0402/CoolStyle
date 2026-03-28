@@ -3,6 +3,9 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import ProductCard from '../components/ProductCard.vue';
 import CyberParticles from '../components/CyberParticles.vue';
+
+// SEO
+document.title = 'CoolStyle — Fashion E-commerce';
 import apiClient from '../utils/api';
 import { ArrowRight, ShoppingBag, Zap, ShieldCheck } from 'lucide-vue-next';
 import anime from 'animejs';

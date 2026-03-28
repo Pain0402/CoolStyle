@@ -124,6 +124,7 @@ watch(() => route.query.category, (newCat) => {
 
 onMounted(() => {
     if (route.query.category) selectedCategory.value = route.query.category as string;
+    document.title = 'Shop — CoolStyle';
     fetchCategories();
     fetchProducts();
 });

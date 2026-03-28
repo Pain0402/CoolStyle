@@ -76,11 +76,22 @@ const fetchProduct = async () => {
     try {
         loading.value = true;
         
-        // Correct API Call: Get Single Product with Variants
         const response: any = await apiClient.get(`/products/${route.params.slug}`);
         
         if (response) {
             product.value = response;
+
+            // Dynamic SEO meta tags
+            document.title = `${response.name} — CoolStyle`;
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.setAttribute('content', response.description?.slice(0, 160) || `Mua ${response.name} tại CoolStyle`);
+            } else {
+                const meta = document.createElement('meta');
+                meta.name = 'description';
+                meta.content = response.description?.slice(0, 160) || `Mua ${response.name} tại CoolStyle`;
+                document.head.appendChild(meta);
+            }
             
             // Setup Images
             images.value = [
@@ -88,19 +99,15 @@ const fetchProduct = async () => {
                 ...(response.images?.map((img: any) => img.url) || [])
             ];
             
-            // Remove duplicates and ensure at least one image
             images.value = [...new Set(images.value)];
             if (images.value.length === 0) images.value = ['https://placehold.co/600x800'];
 
-            // Set Default Variant
             if (response.variants && response.variants.length > 0) {
                 const firstVar = response.variants[0];
                 selectedColor.value = firstVar.colorName;
                 selectedSize.value = firstVar.size;
             }
 
-            // Fetch related products separately if needed or mock for now
-            // For now, mocking related to keep it simple, or call list API
             relatedProducts.value = []; 
             fetchRelated(response.categoryName);
         }
